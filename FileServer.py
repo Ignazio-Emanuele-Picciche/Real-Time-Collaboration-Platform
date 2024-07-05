@@ -33,22 +33,55 @@ async def send_user_list():
         await asynco.wait([client.send(user_list_message)] for client in connected_clients)
 
 
+'''
+    In this method, we manage the principal logic of the file server:
+    - It handles the connection and communication with clients
+    - It maintains a list of connected clients and chat history
+    - It menage disconnection of clients
+
+    Args:
+        websocket: The WebSocket connection object for a client
+        path: The URL path requested by the client
+
+    Returns:
+        None
+'''
 async def file_server(websocket, path):
-    
-    # TODO: Implement the file server logic here
+
     try:
         await websocket.send("Welcome to the Shared File! Please enter your name:")
-        username = await websocket.recv()
+        username = await websocket.recv() # Wait for the client to send their username
 
-    except:
+        connected_clients[username] = websocket
+        # await send_chat_history(websocket) # Send chat history to the new client
+        join_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has joined the chat."
+        await send_to_all(join_message) # Send a message to all connected clients
+        chat_history.append(join_message) # Add the join_message to the chat history
+
+        await send_user_list() # Update user list to all connected clients
+
+        # Wait for messages from the client
+        async for message in websocket:
+            chat_message = f"{uuid.uuid4()}|{username}|{datetime.now().isoformat()}|{message}"
+            chat_history.append(chat_message)
+            await send_to_all(chat_message)
+ 
+    except websockets.ConnectionClosed:
         pass
 
     finally:
-        pass
+        # Remove the client from the connected_clients dictionary
+        leave_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has left the chat."
+        connected_clients.pop(username)
+        await send_to_all(leave_message) # Send a message to all connected clients that the user has left
+        chat_history.append(leave_message)  
+
+        await send_user_list()
 
 
+# Start the server
+start_server = websockets.serve(chat_server, 'localhost', 4444) 
 
-start_server = websockets.serve(chat_server, 'localhost', 4444)
-
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+# Get the default event loop for the current context
+asyncio.get_event_loop().run_until_complete(start_server)  # Start the server and run until the start_server coroutine is complete
+asyncio.get_event_loop().run_forever()  # Run the event loop indefinitely to keep the server running
