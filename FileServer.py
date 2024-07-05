@@ -1,4 +1,4 @@
-import asynco
+import asyncio
 import websockets
 import uuid
 from datetime import datetime
@@ -29,8 +29,9 @@ async def send_user_list():
     """
     # Loop through all connected clients and send the user list
     if connected_clients:
-        user_list = "USERS: " + "," + ",".join(connected_clients.values())
-        await asynco.wait([client.send(user_list_message)] for client in connected_clients)
+        user_list_message = "USERS: " + "," + ",".join(connected_clients.values())
+        await asyncio.wait([client.send(user_list_message)] for client in connected_clients)
+
 
 
 '''
@@ -80,7 +81,7 @@ async def file_server(websocket, path):
 
 
 # Start the server
-start_server = websockets.serve(chat_server, 'localhost', 4444) 
+start_server = websockets.serve(file_server, 'localhost', 4444) 
 
 # Get the default event loop for the current context
 asyncio.get_event_loop().run_until_complete(start_server)  # Start the server and run until the start_server coroutine is complete
