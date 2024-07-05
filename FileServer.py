@@ -33,7 +33,6 @@ async def send_user_list():
         await asyncio.wait([client.send(user_list_message)] for client in connected_clients)
 
 
-
 '''
     In this method, we manage the principal logic of the file server:
     - It handles the connection and communication with clients
