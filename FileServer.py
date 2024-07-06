@@ -15,12 +15,14 @@ async def send_to_all(message):
         await asyncio.wait([client.send(message)] for client in connected_clients)
 
 
-# async def send_chat_history(websocket):
-#     """
-#     Sends the entire chat history to the newly connected client
-#     """
-#     for message in chat_history:
-#         await websocket.send(message)
+
+
+async def send_chat_history(websocket):
+     """
+     Sends the entire chat history to the newly connected client
+     """
+     for message in chat_history:
+         await websocket.send(message)
 
 
 async def send_user_list():
@@ -52,8 +54,8 @@ async def file_server(websocket, path):
         await websocket.send("Welcome to the Shared File! Please enter your name:")
         username = await websocket.recv() # Wait for the client to send their username
 
-        connected_clients[username] = websocket
-        # await send_chat_history(websocket) # Send chat history to the new client
+        connected_clients[websocket] = username
+        await send_chat_history(websocket) # Send chat history to the new client
         join_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has joined the chat."
         await send_to_all(join_message) # Send a message to all connected clients
         chat_history.append(join_message) # Add the join_message to the chat history
@@ -80,7 +82,7 @@ async def file_server(websocket, path):
 
 
 # Start the server
-start_server = websockets.serve(file_server, 'localhost', 4444) 
+start_server = websockets.serve(file_server, 'localhost',4000) 
 
 # Get the default event loop for the current context
 asyncio.get_event_loop().run_until_complete(start_server)  # Start the server and run until the start_server coroutine is complete
