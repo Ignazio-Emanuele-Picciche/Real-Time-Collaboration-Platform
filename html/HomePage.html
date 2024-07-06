@@ -123,20 +123,125 @@
             </div>
         
         <div id="chatWrapper">
-            <h3 style="font-size: 12px;">Online Users</h3>
+            <h3 style="font-size: 12px;">Status</h3>
             <div id="chat"></div>
+            <h3 style="font-size: 12px;">Online Users</h3>
             <div id="userlist"></div>
         </div>
         <div id="messageInputContainer">
             <h3 style="font-size: 20px;">Text</h3>
 
-            <textarea id="message" rows="3" placeholder="Type a message..." disabled></textarea>
-            <button id="send" disabled>Send</button>
+            <textarea id="editor" rows="20" cols="100" placeholder="Content Document..." disabled></textarea>
+            <!-- <button id="send" disabled>Send</button> -->
         </div>
     </div>
 
-    <script>
-        // JavaScript code goes here
+    
+        <script>
+            const chat = document.getElementById('chat');
+            const userlist = document.getElementById('userlist');
+            const editor = document.getElementById('editor');
+            // const sendButton = document.getElementById('send');
+            const usernameInput = document.getElementById('username');
+            const setUsernameButton = document.getElementById('setUsername');
+            const toggleTimestamps = document.getElementById('toggleTimestamps');
+
+            const ws = new WebSocket('ws://localhost:4000');
+
+            function isValidJSON(text) {
+                try {
+                    JSON.parse(text);
+                    return true;
+                } catch {
+                    return false;
+                }
+            }
+
+            // ws.onopen = () => {
+            //     editor.disabled = false;
+            //     sendButton.disabled = false;
+            // };
+
+
+            ws.onmessage = (event) => {
+                // console.log(event.data);
+                
+                if (isValidJSON(event.data)) {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'content') {
+                        editor.value = data.content;
+                    }
+                } else {    
+                    // Handle non-JSON messages here, if needed
+                    console.log("Received non-JSON message:", event.data);
+
+                    const message = event.data;
+
+                    if (message.startsWith("USERS:")) {
+                        // Update user list
+                        const users = message.substring(6).split(",");
+                        userlist.innerHTML = users.join("<br>");
+                    } else {
+                        // Process chat message with ID and timestamp
+                        const [id, sender, timestamp, content] = message.split("|");
+
+                        const chatMessage = document.createElement('div');
+                        chatMessage.dataset.id = id;
+
+                        const timestampSpan = document.createElement('span');
+                        timestampSpan.className = 'timestamp';
+                        timestampSpan.textContent = `[${timestamp}] `;
+                        timestampSpan.style.display = toggleTimestamps.checked ? 'inline' : 'none';
+
+                        const senderSpan = document.createElement('span');
+                        senderSpan.className = 'sender';
+                        senderSpan.textContent = `${sender}: `;
+
+                        const contentSpan = document.createElement('span');
+                        contentSpan.className = 'content';
+                        contentSpan.textContent = content;
+
+                        chatMessage.appendChild(timestampSpan);
+                        chatMessage.appendChild(senderSpan);
+                        chatMessage.appendChild(contentSpan);
+                        chat.appendChild(chatMessage);
+                        chat.scrollTop = chat.scrollHeight;
+                    } 
+                }
+
+            };
+
+            toggleTimestamps.onchange = () => {
+                const timestamps = document.querySelectorAll('.timestamp');
+                timestamps.forEach(timestamp => {
+                    timestamp.style.display = toggleTimestamps.checked ? 'inline' : 'none';
+                });
+            };
+
+            setUsernameButton.onclick = () => {
+                const username = usernameInput.value;
+                if (username) {
+                    ws.send(username);
+                    usernameInput.disabled = true;
+                    setUsernameButton.disabled = true;
+                    // input.disabled = false;
+                    // sendButton.disabled = false;
+                }
+            };
+
+            // sendButton.onclick = () => {
+            //     const message = input.value;
+            //     if (message) {
+            //         ws.send(message);
+            //         input.value = '';
+            //     }
+            // };
+
+            // input.addEventListener('keydown', (e) => {
+            //     if (e.key === 'Enter') {
+            //         sendButton.click();
+            //     }
+            // });
     </script>
 </body>
 </html>
