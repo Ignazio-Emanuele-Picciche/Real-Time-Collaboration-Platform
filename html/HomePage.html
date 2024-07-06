@@ -149,7 +149,8 @@
             const toggleTimestamps = document.getElementById('toggleTimestamps');
 
             const ws = new WebSocket('ws://localhost:4000');
-
+            
+            // In this method we check if the text is a valid JSON
             function isValidJSON(text) {
                 try {
                     JSON.parse(text);
@@ -166,6 +167,8 @@
 
 
             ws.onmessage = (event) => {
+                console.log("prova")
+
                 // console.log(event.data);
                 
                 if (isValidJSON(event.data)) {
@@ -212,7 +215,9 @@
                 }
 
             };
-
+            
+            // In this method we check if taggle Timestamps is checked or not. 
+            // If it is checked we show the timestamp, otherwise we hide it.
             toggleTimestamps.onchange = () => {
                 const timestamps = document.querySelectorAll('.timestamp');
                 timestamps.forEach(timestamp => {
@@ -220,6 +225,7 @@
                 });
             };
 
+            // In this method we send the username to the server, if the username is not empty
             setUsernameButton.onclick = () => {
                 const username = usernameInput.value;
                 if (username) {
@@ -231,6 +237,16 @@
                     // sendButton.disabled = false;
                 }
             };
+
+            // In this method we check if the editor is changed and we send the message to the server
+            editor.addEventListener('input', () => {
+                const message = {
+                    type: 'update',
+                    content: editor.value
+                };
+                ws.send(JSON.stringify(message));
+                // console.log('ciccio')
+            });
 
             // sendButton.onclick = () => {
             //     const message = input.value;

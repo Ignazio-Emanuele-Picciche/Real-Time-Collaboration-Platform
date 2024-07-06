@@ -59,7 +59,7 @@ async def broadcast(message):
     Broadcasts a message to all connected clients
     """
     if connected_clients:
-        asyncio.wait([client.send(json.dumps(message)) for client in connected_clients])
+        await asyncio.wait([client.send(json.dumps(message)) for client in connected_clients])
 
 
 '''
