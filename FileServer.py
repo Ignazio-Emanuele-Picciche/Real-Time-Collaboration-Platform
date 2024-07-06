@@ -1,10 +1,14 @@
 import asyncio
 import websockets
 import uuid
+import json
+import os
 from datetime import datetime
+
 
 connected_clients = {} # Dictionary to store the connected clients
 chat_history = [] # List to store the chat history
+FILE_PATH = "shared_file.txt" # Path to the shared file
 
 async def send_to_all(message):
     """
@@ -34,6 +38,29 @@ async def send_user_list():
         user_list_message = "USERS: " + "," + ",".join(connected_clients.values())
         await asyncio.wait([client.send(user_list_message) for client in connected_clients])
 
+async def load_file():
+    """
+    Loads the contents of the shared file
+    """
+    if os.path.exists(FILE_PATH):
+        with open (FILE_PATH, 'r') as file:
+            return file.read()
+    return ""
+
+async def save_file(content):
+    """
+    Saves the contents of the shared file
+    """
+    with open (FILE_PATH, 'w') as file:
+        file.write(content)
+
+async def broadcast(message):
+    """
+    Broadcasts a message to all connected clients
+    """
+    if connected_clients:
+        asyncio.wait([client.send(json.dumps(message)) for client in connected_clients])
+
 
 '''
     In this method, we manage the principal logic of the file server:
@@ -55,28 +82,36 @@ async def file_server(websocket, path):
         username = await websocket.recv() # Wait for the client to send their username
 
         connected_clients[websocket] = username
-        await send_chat_history(websocket) # Send chat history to the new client
-        join_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has joined the chat."
+        # await send_chat_history(websocket) # Send chat history to the new client
+        join_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has joined the document."
         await send_to_all(join_message) # Send a message to all connected clients
-        chat_history.append(join_message) # Add the join_message to the chat history
+        # chat_history.append(join_message) # Add the join_message to the chat history
 
         await send_user_list() # Update user list to all connected clients
+        content = await load_file() # Load the contents of the shared file
+        await websocket.send(json.dumps({"type": "content", "content": content})) # Send the contents of the shared file to the client
 
         # Wait for messages from the client
         async for message in websocket:
-            chat_message = f"{uuid.uuid4()}|{username}|{datetime.now().isoformat()}|{message}"
-            chat_history.append(chat_message)
-            await send_to_all(chat_message)
+            data = json.loads(message)
+            if data['type'] == 'update':
+                content = data['content']
+                await save_file(content)
+                await broadcast({"type": "content", "content" : content})
+
+            # chat_message = f"{uuid.uuid4()}|{username}|{datetime.now().isoformat()}|{message}"
+            # chat_history.append(chat_message)
+            # await send_to_all(chat_message)
  
     except websockets.ConnectionClosed:
         pass
 
     finally:
         # Remove the client from the connected_clients dictionary
-        leave_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has left the chat."
+        leave_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has left the document."
         connected_clients.pop(websocket, None)
         await send_to_all(leave_message) # Send a message to all connected clients that the user has left
-        chat_history.append(leave_message)  
+        # chat_history.append(leave_message)  
 
         await send_user_list()
 
