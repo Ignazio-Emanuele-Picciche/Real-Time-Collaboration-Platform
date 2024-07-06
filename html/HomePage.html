@@ -2,112 +2,141 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebSocket Chat with Message IDs and Timestamps</title>
+    <title>work Document real time </title>
     <style>
-        #chat { border: 1px solid black; height: 300px; overflow-y: scroll; margin-bottom: 10px; padding: 10px; }
-        #userlist { border: 1px solid black; height: 300px; overflow-y: scroll; margin-bottom: 10px; padding: 10px; }
-        #username, #input { width: 80%; }
-        #usernameInputContainer { margin-bottom: 10px; }
+        /* Styling for the body */
+        body { 
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        /* Styling for the chat container */
+        #chatContainer {
+            width: 80%;
+            max-width: 800px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        /* Styling for the heading */
+        h2 {
+            background: #61baff;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h3 {
+            background: #0033fe;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        /* Styling for the username input container, toggle container, and message input container */
+        #usernameInputContainer, #toggleContainer, #messageInputContainer {
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        /* Styling for the chat wrapper */
+        #chatWrapper {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        /* Styling for the chat and userlist */
+        #chat, #userlist {
+            width: 50%;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        /* Styling for the chat messages */
+        #chat {
+            border-right: 1px solid #ddd;
+        }
+        
+        /* Styling for the chat message elements */
+        #chat div, #userlist div {
+            margin-bottom: 10px;
+        }
+        
+        /* Styling for the username and message input fields */
+        #username, #message {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        /* Styling for the set username and send buttons */
+        #setUsername, #send {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background: #ffcc5c;
+            color: #fff;
+            cursor: pointer;
+        }
+        
+        /* Styling for the disabled set username and send buttons */
+        #setUsername:disabled, #send:disabled {
+            background: #ccc;
+        }
+        
+        /* Styling for the timestamp */
+        .timestamp {
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        /* Styling for the sender name */
+        .sender {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h2>WebSocket Chat System with Message IDs and Timestamps</h2>
-    <div id="usernameInputContainer">
-        <input id="username" type="text" placeholder="Enter your username" />
-        <button id="setUsername">Set Username</button>
+
+    <div id="chatContainer">
+        <title>Document </title>
+        <h2>Work document in real</h2>
+        <div id="usernameInputContainer">
+            <input id="username" type="text" placeholder="Enter your username" />
+            <button id="setUsername">Set Username</button>
+        </div>
+            <div id="toggleContainer">
+                
+                <input type="checkbox" id="toggleTimestamps" checked>
+                <label for="toggleTimestamps">Show Timestamps</label>
+            </div>
+        
+        <div id="chatWrapper">
+            <h3 style="font-size: 12px;">Online Users</h3>
+            <div id="chat"></div>
+            <div id="userlist"></div>
+        </div>
+        <div id="messageInputContainer">
+            <h3 style="font-size: 20px;">Text</h3>
+
+            <textarea id="message" rows="3" placeholder="Type a message..." disabled></textarea>
+            <button id="send" disabled>Send</button>
+        </div>
     </div>
-    <div>
-        <input type="checkbox" id="toggleTimestamps" checked>
-        <label for="toggleTimestamps">Show Timestamps</label>
-    </div>
-    <div id="chatWrapper">
-        <div id="chat"></div>
-        <div id="userlist"></div>
-    </div>
-    <input id="input" type="text" placeholder="Type a message..." disabled />
-    <button id="send" disabled>Send</button>
 
     <script>
-        const chat = document.getElementById('chat');
-        const userlist = document.getElementById('userlist');
-        const input = document.getElementById('input');
-        const sendButton = document.getElementById('send');
-        const usernameInput = document.getElementById('username');
-        const setUsernameButton = document.getElementById('setUsername');
-        const toggleTimestamps = document.getElementById('toggleTimestamps');
-
-        const ws = new WebSocket('ws://localhost:5555');
-
-        console.log(ws)
-
-        ws.onmessage = (event) => {
-            const message = event.data;
-
-            if (message.startsWith("USERS:")) {
-                // Update user list
-                const users = message.substring(6).split(",");
-                userlist.innerHTML = "<strong>Online Users:</strong><br>" + users.join("<br>");
-            } else {
-                // Process chat message with ID and timestamp
-                const [id, sender, timestamp, content] = message.split("|");
-
-                const chatMessage = document.createElement('div');
-                chatMessage.dataset.id = id;
-
-                const timestampSpan = document.createElement('span');
-                timestampSpan.className = 'timestamp';
-                timestampSpan.textContent = `[${timestamp}] `;
-                timestampSpan.style.display = toggleTimestamps.checked ? 'inline' : 'none';
-
-                const senderSpan = document.createElement('span');
-                senderSpan.className = 'sender';
-                senderSpan.textContent = `${sender}: `;
-
-                const contentSpan = document.createElement('span');
-                contentSpan.className = 'content';
-                contentSpan.textContent = content;
-
-                chatMessage.appendChild(timestampSpan);
-                chatMessage.appendChild(senderSpan);
-                chatMessage.appendChild(contentSpan);
-                chat.appendChild(chatMessage);
-                chat.scrollTop = chat.scrollHeight;
-            }
-        };
-
-        toggleTimestamps.onchange = () => {
-            const timestamps = document.querySelectorAll('.timestamp');
-            timestamps.forEach(timestamp => {
-                timestamp.style.display = toggleTimestamps.checked ? 'inline' : 'none';
-            });
-        };
-
-        setUsernameButton.onclick = () => {
-            const username = usernameInput.value;
-            if (username) {
-                ws.send(username);
-                usernameInput.disabled = true;
-                setUsernameButton.disabled = true;
-                input.disabled = false;
-                sendButton.disabled = false;
-            }
-        };
-
-        sendButton.onclick = () => {
-            const message = input.value;
-            if (message) {
-                ws.send(message);
-                input.value = '';
-            }
-        };
-
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                sendButton.click();
-            }
-        });
+        // JavaScript code goes here
     </script>
 </body>
 </html>
-
-
