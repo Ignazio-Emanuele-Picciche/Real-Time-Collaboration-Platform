@@ -82,7 +82,7 @@ async def file_server(websocket, path):
 
 
 # Start the server
-start_server = websockets.serve(file_server, 'localhost',4000) 
+start_server = websockets.serve(file_server, '0.0.0.0',5555) 
 
 # Get the default event loop for the current context
 asyncio.get_event_loop().run_until_complete(start_server)  # Start the server and run until the start_server coroutine is complete

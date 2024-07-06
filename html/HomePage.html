@@ -36,7 +36,9 @@
         const setUsernameButton = document.getElementById('setUsername');
         const toggleTimestamps = document.getElementById('toggleTimestamps');
 
-        const ws = new WebSocket('ws://localhost:4000');
+        const ws = new WebSocket('ws://localhost:5555');
+
+        console.log(ws)
 
         ws.onmessage = (event) => {
             const message = event.data;
@@ -107,3 +109,5 @@
     </script>
 </body>
 </html>
+
+
