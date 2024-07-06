@@ -12,7 +12,7 @@ async def send_to_all(message):
     """
     # Loop through all connected clients and send the message
     if connected_clients:
-        await asyncio.wait([client.send(message)] for client in connected_clients)
+        await asyncio.wait([client.send(message) for client in connected_clients])
 
 
 
@@ -32,7 +32,7 @@ async def send_user_list():
     # Loop through all connected clients and send the user list
     if connected_clients:
         user_list_message = "USERS: " + "," + ",".join(connected_clients.values())
-        await asyncio.wait([client.send(user_list_message)] for client in connected_clients)
+        await asyncio.wait([client.send(user_list_message) for client in connected_clients])
 
 
 '''
@@ -74,7 +74,7 @@ async def file_server(websocket, path):
     finally:
         # Remove the client from the connected_clients dictionary
         leave_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has left the chat."
-        connected_clients.pop(username)
+        connected_clients.pop(websocket, None)
         await send_to_all(leave_message) # Send a message to all connected clients that the user has left
         chat_history.append(leave_message)  
 
