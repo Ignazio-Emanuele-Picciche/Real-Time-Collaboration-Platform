@@ -21,12 +21,12 @@ async def send_to_all(message):
 
 
 
-async def send_chat_history(websocket):
-     """
-     Sends the entire chat history to the newly connected client
-     """
-     for message in chat_history:
-         await websocket.send(message)
+# async def send_chat_history(websocket):
+#      """
+#      Sends the entire chat history to the newly connected client
+#      """
+#      for message in chat_history:
+#          await websocket.send(message)
 
 
 async def send_user_list():
