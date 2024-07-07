@@ -116,6 +116,8 @@
         <div id="usernameInputContainer">
             <input id="username" type="text" placeholder="Enter your username" />
             <button id="setUsername">Set Username</button>
+            <button id="simulatePartition">Simulate Partition</button>
+            <button id="reconnect">Reconnect</button>
         </div>
             <div id="toggleContainer">
                 
@@ -147,34 +149,35 @@
             const usernameInput = document.getElementById('username');
             const setUsernameButton = document.getElementById('setUsername');
             const toggleTimestamps = document.getElementById('toggleTimestamps');
+            const simulatePartitionButton = document.getElementById('simulatePartition');
+            const reconnectButton = document.getElementById('reconnect');
 
-            const ws = new WebSocket('ws://localhost:4000');
-            
-            // In this method we check if the text is a valid JSON
-            function isValidJSON(text) {
-                try {
-                    JSON.parse(text);
-                    return true;
-                } catch {
-                    return false;
-                }
-            }
+            let ws = new WebSocket('ws://localhost:4000');
+            let localChanges = [];
+            let versione = 0;
+            let isConnected = true;
 
-            // ws.onopen = () => {
-            //     editor.disabled = false;
-            //     sendButton.disabled = false;
-            // };
+            // In this method we create a connection with the server
+            function connectedWebSocket() {
+                ws = new WebSocket('ws://localhost:4000');;
+                ws.onopen = () => {
+                    editor.disabled = false;
+                    if (localChanges.length > 0) {
+                        localChanges.forEach(change => ws.send(JSON.stringify(change)));
+                    }
+                };
 
-
-            ws.onmessage = (event) => {
+                ws.onmessage = (event) => {
                 console.log("prova")
 
                 // console.log(event.data);
                 
                 if (isValidJSON(event.data)) {
+                    // Handle JSON messages here
                     const data = JSON.parse(event.data);
                     if (data.type === 'content') {
-                        editor.value = data.content;
+                        // editor.value = data.content;
+                        reconcileChanges(data.content, data.version)
                     }
                 } else {    
                     // Handle non-JSON messages here, if needed
@@ -215,6 +218,40 @@
                 }
 
             };
+                
+            }
+        
+            // In this method we check if the text is a valid JSON
+            function isValidJSON(text) {
+                try {
+                    JSON.parse(text);
+                    return true;
+                } catch {
+                    return false;
+                }
+            }
+
+            // ws.onopen = () => {
+            //     editor.disabled = false;
+            //     sendButton.disabled = false;
+            // };
+
+            // In this method we reconcile the changes between the local content and the server content
+            function reconcileChanges(newContent, newVersion) {
+                if (newVersion > version) {
+                    editor.value = newContent;
+                    version = newVersion;
+                    localChanges = [];
+                } else if (newVersion == version) {
+                    localChanges.forEach(change => applyChange(change));
+                }
+            }
+
+            // In this method we apply the changes to the editor
+            function applyChange(change) {
+                editor.value = change.content;
+            }
+            
             
             // In this method we check if taggle Timestamps is checked or not. 
             // If it is checked we show the timestamp, otherwise we hide it.
@@ -240,13 +277,35 @@
 
             // In this method we check if the editor is changed and we send the message to the server
             editor.addEventListener('input', () => {
+                if (isConnected) {
                 const message = {
                     type: 'update',
-                    content: editor.value
+                    content: editor.value,
+                    version: ++version
                 };
+                localChanges.push(message);
                 ws.send(JSON.stringify(message));
                 // console.log('ciccio')
+                }
             });
+
+            // In this method we simulate the partition
+            simulatePartitionButton.onclick = () => {
+                ws.close();
+                isConnected = false;
+                reconnectButton.disabled = false;
+                simulatePartitionButton.disabled = true;
+            };
+
+            // In this method we reconnect the server
+            reconnectButton.onclick = () => {
+                connectedWebSocket();
+                isConnected = true;
+                reconnectButton.disabled = true;
+                simulatePartitionButton.disabled = false;
+            };
+
+            connectedWebSocket();
 
             // sendButton.onclick = () => {
             //     const message = input.value;
