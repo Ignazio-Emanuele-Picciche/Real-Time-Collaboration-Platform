@@ -3,109 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>work Document real time </title>
-    <style>
-        /* Styling for the body */
-        body { 
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        
-        /* Styling for the chat container */
-        #chatContainer {
-            width: 80%;
-            max-width: 800px;
-            background: #f8f8f8;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        
-        /* Styling for the heading */
-        h2 {
-            background: #61baff;
-            color: #fff;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
-        h3 {
-            background: #0033fe;
-            color: #fff;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        /* Styling for the username input container, toggle container, and message input container */
-        #usernameInputContainer, #toggleContainer, #messageInputContainer {
-            padding: 20px;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        /* Styling for the chat wrapper */
-        #chatWrapper {
-            display: flex;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        /* Styling for the chat and userlist */
-        #chat, #userlist {
-            width: 50%;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        
-        /* Styling for the chat messages */
-        #chat {
-            border-right: 1px solid #ddd;
-        }
-        
-        /* Styling for the chat message elements */
-        #chat div, #userlist div {
-            margin-bottom: 10px;
-        }
-        
-        /* Styling for the username and message input fields */
-        #username, #message {
-            width: calc(100% - 20px);
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-        
-        /* Styling for the set username and send buttons */
-        #setUsername, #send {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            background: #ffcc5c;
-            color: #fff;
-            cursor: pointer;
-        }
-        
-        /* Styling for the disabled set username and send buttons */
-        #setUsername:disabled, #send:disabled {
-            background: #ccc;
-        }
-        
-        /* Styling for the timestamp */
-        .timestamp {
-            color: #888;
-            font-size: 0.9em;
-        }
-        
-        /* Styling for the sender name */
-        .sender {
-            font-weight: bold;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -115,8 +13,8 @@
         <div id="usernameInputContainer">
             <input id="username" type="text" placeholder="Enter your username" />
             <button id="setUsername">Set Username</button>
-            <button id="simulatePartition">Simulate Partition</button>
-            <button id="reconnect">Reconnect</button>
+            <button id="simulatePartition" disabled>Simulate Partition</button>
+            <button id="reconnect" disabled>Reconnect</button>
         </div>
             <div id="toggleContainer">
                 
@@ -150,6 +48,8 @@
             const toggleTimestamps = document.getElementById('toggleTimestamps');
             const simulatePartitionButton = document.getElementById('simulatePartition');
             const reconnectButton = document.getElementById('reconnect');
+            
+            var username = '';
 
             let ws = new WebSocket('ws://localhost:4000');
             let localChanges = [];
@@ -159,10 +59,11 @@
             // In this method we create a connection with the server
             function connectedWebSocket() {
                 ws = new WebSocket('ws://localhost:4000');
+
                 ws.onopen = () => {
                     editor.disabled = false;
                     if (localChanges.length > 0) {
-                        console.log(localChanges)
+                        console.log('entrato')
                         localChanges.forEach(change => ws.send(JSON.stringify(change)));
                     }
                 }; 
@@ -174,11 +75,12 @@
                     
                     if (isValidJSON(event.data)) {
                         // Handle JSON messages here
+                        console.log('Received JSON message:', event.data)
                         const data = JSON.parse(event.data);
                         if (data.type === 'content') {
                             //editor.value = data.content;
-                            console.log(data.version)
-                            reconcileChanges(data.content, data.version+1)
+                            // console.log(data.version)
+                            reconcileChanges(data.content, data.version)
                         }
                     } else {    
                         // Handle non-JSON messages here, if needed
@@ -219,9 +121,8 @@
                     }
                 };
             }
-                
-          
-        
+
+
             // In this method we check if the text is a valid JSON
             function isValidJSON(text) {
                 try {
@@ -245,11 +146,12 @@
                 if (isNaN(newVersion)) {
                     editor.value = newContent;
                 } else if (newVersion > version) {
-                    console.log('versione maggiore')
+                    console.log('versione minore')
                     editor.value = newContent;
                     version = newVersion;
                     localChanges = [];
                 } else if (newVersion == version) {
+                    console.log('versione uguale')
                     localChanges.forEach(change => applyChange(change));
                 }
             }
@@ -271,29 +173,33 @@
 
             // In this method we send the username to the server, if the username is not empty
             setUsernameButton.onclick = () => {
-                const username = usernameInput.value;
+                username = usernameInput.value;
                 if (username) {
                     ws.send(username);
                     usernameInput.disabled = true;
                     setUsernameButton.disabled = true;
                     editor.disabled = false;
-                    // input.disabled = false;
-                    // sendButton.disabled = false;
+                    simulatePartitionButton.disabled = false;
                 }
             };
 
             // In this method we check if the editor is changed and we send the message to the server
             editor.addEventListener('input', () => {
-                if (isConnected) {
+                
                 const message = {
                     type: 'update',
                     content: editor.value,
-                    version: ++version
+                    version: ++version,
+                    username: username
                 };
+
                 localChanges.push(message);
-                ws.send(JSON.stringify(message));
-                // console.log('ciccio')
+                console.log(localChanges)
+
+                if(isConnected) {
+                    ws.send(JSON.stringify(message));
                 }
+                
             });
 
             // In this method we simulate the partition
@@ -313,20 +219,6 @@
             };
 
             connectedWebSocket();
-
-            // sendButton.onclick = () => {
-            //     const message = input.value;
-            //     if (message) {
-            //         ws.send(message);
-            //         input.value = '';
-            //     }
-            // };
-
-            // input.addEventListener('keydown', (e) => {
-            //     if (e.key === 'Enter') {
-            //         sendButton.click();
-            //     }
-            // });
     </script>
 </body>
 </html>
