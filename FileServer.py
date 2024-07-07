@@ -96,8 +96,12 @@ async def file_server(websocket, path):
             data = json.loads(message)
             if data['type'] == 'update':
                 content = data['content']
+                version = data['version']
+
+                print('\n'+str(version)+'\n')
+
                 await save_file(content)
-                await broadcast({"type": "content", "content" : content})
+                await broadcast({"type": "content", "content": content, "version": version})
 
             # chat_message = f"{uuid.uuid4()}|{username}|{datetime.now().isoformat()}|{message}"
             # chat_history.append(chat_message)

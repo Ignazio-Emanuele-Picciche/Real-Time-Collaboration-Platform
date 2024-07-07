@@ -10,8 +10,7 @@
             background-color: #f0f0f0;
             margin: 0;
             padding: 20px;
-            
-            
+            display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -154,72 +153,74 @@
 
             let ws = new WebSocket('ws://localhost:4000');
             let localChanges = [];
-            let versione = 0;
+            let version = 0;
             let isConnected = true;
 
             // In this method we create a connection with the server
             function connectedWebSocket() {
-                ws = new WebSocket('ws://localhost:4000');;
+                ws = new WebSocket('ws://localhost:4000');
                 ws.onopen = () => {
                     editor.disabled = false;
                     if (localChanges.length > 0) {
+                        console.log(localChanges)
                         localChanges.forEach(change => ws.send(JSON.stringify(change)));
                     }
-                };
+                }; 
 
                 ws.onmessage = (event) => {
-                console.log("prova")
+                    // console.log("prova")
 
-                // console.log(event.data);
-                
-                if (isValidJSON(event.data)) {
-                    // Handle JSON messages here
-                    const data = JSON.parse(event.data);
-                    if (data.type === 'content') {
-                        // editor.value = data.content;
-                        reconcileChanges(data.content, data.version)
+                    // console.log(event.data);
+                    
+                    if (isValidJSON(event.data)) {
+                        // Handle JSON messages here
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'content') {
+                            //editor.value = data.content;
+                            console.log(data.version)
+                            reconcileChanges(data.content, data.version+1)
+                        }
+                    } else {    
+                        // Handle non-JSON messages here, if needed
+                        console.log("Received non-JSON message:", event.data);
+
+                        const message = event.data;
+
+                        if (message.startsWith("USERS:")) {
+                            // Update user list
+                            const users = message.substring(6).split(",");
+                            userlist.innerHTML = users.join("<br>");
+                        } else {
+                            // Process chat message with ID and timestamp
+                            const [id, sender, timestamp, content] = message.split("|");
+
+                            const chatMessage = document.createElement('div');
+                            chatMessage.dataset.id = id;
+
+                            const timestampSpan = document.createElement('span');
+                            timestampSpan.className = 'timestamp';
+                            timestampSpan.textContent = `[${timestamp}] `;
+                            timestampSpan.style.display = toggleTimestamps.checked ? 'inline' : 'none';
+
+                            const senderSpan = document.createElement('span');
+                            senderSpan.className = 'sender';
+                            senderSpan.textContent = `${sender}: `;
+
+                            const contentSpan = document.createElement('span');
+                            contentSpan.className = 'content';
+                            contentSpan.textContent = content;
+
+                            chatMessage.appendChild(timestampSpan);
+                            chatMessage.appendChild(senderSpan);
+                            chatMessage.appendChild(contentSpan);
+                            chat.appendChild(chatMessage);
+                            chat.scrollTop = chat.scrollHeight;
+                        } 
                     }
-                } else {    
-                    // Handle non-JSON messages here, if needed
-                    console.log("Received non-JSON message:", event.data);
-
-                    const message = event.data;
-
-                    if (message.startsWith("USERS:")) {
-                        // Update user list
-                        const users = message.substring(6).split(",");
-                        userlist.innerHTML = users.join("<br>");
-                    } else {
-                        // Process chat message with ID and timestamp
-                        const [id, sender, timestamp, content] = message.split("|");
-
-                        const chatMessage = document.createElement('div');
-                        chatMessage.dataset.id = id;
-
-                        const timestampSpan = document.createElement('span');
-                        timestampSpan.className = 'timestamp';
-                        timestampSpan.textContent = `[${timestamp}] `;
-                        timestampSpan.style.display = toggleTimestamps.checked ? 'inline' : 'none';
-
-                        const senderSpan = document.createElement('span');
-                        senderSpan.className = 'sender';
-                        senderSpan.textContent = `${sender}: `;
-
-                        const contentSpan = document.createElement('span');
-                        contentSpan.className = 'content';
-                        contentSpan.textContent = content;
-
-                        chatMessage.appendChild(timestampSpan);
-                        chatMessage.appendChild(senderSpan);
-                        chatMessage.appendChild(contentSpan);
-                        chat.appendChild(chatMessage);
-                        chat.scrollTop = chat.scrollHeight;
-                    } 
-                }
-
-            };
-                
+                };
             }
+                
+          
         
             // In this method we check if the text is a valid JSON
             function isValidJSON(text) {
@@ -238,7 +239,13 @@
 
             // In this method we reconcile the changes between the local content and the server content
             function reconcileChanges(newContent, newVersion) {
-                if (newVersion > version) {
+                console.log('newVersion'+newVersion)
+                console.log('version'+ version)
+
+                if (isNaN(newVersion)) {
+                    editor.value = newContent;
+                } else if (newVersion > version) {
+                    console.log('versione maggiore')
                     editor.value = newContent;
                     version = newVersion;
                     localChanges = [];
