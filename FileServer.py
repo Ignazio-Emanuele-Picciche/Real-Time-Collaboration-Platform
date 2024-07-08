@@ -18,17 +18,6 @@ async def send_to_all(message):
     if connected_clients:
         await asyncio.wait([client.send(message) for client in connected_clients])
 
-
-
-
-# async def send_chat_history(websocket):
-#      """
-#      Sends the entire chat history to the newly connected client
-#      """
-#      for message in chat_history:
-#          await websocket.send(message)
-
-
 async def send_user_list():
     """
     Broadcasts the list of currently connected users to all clients
@@ -93,10 +82,9 @@ async def file_server(websocket, path):
             print('Error decoding JSON')
 
         connected_clients[websocket] = username
-        # await send_chat_history(websocket) # Send chat history to the new client
         join_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has joined the document."
         await send_to_all(join_message) # Send a message to all connected clients
-        # chat_history.append(join_message) # Add the join_message to the chat history
+        
 
         await send_user_list() # Update user list to all connected clients
         content = await load_file() # Load the contents of the shared file
@@ -109,15 +97,8 @@ async def file_server(websocket, path):
             if data['type'] == 'update':
                 content = data['content']
                 version = data['version']
-
-                # print('\n'+str(version)+'\n')
-
                 await save_file(content)
                 await broadcast({"type": "content", "content": content, "version": version})
-
-            # chat_message = f"{uuid.uuid4()}|{username}|{datetime.now().isoformat()}|{message}"
-            # chat_history.append(chat_message)
-            # await send_to_all(chat_message)
  
     except websockets.ConnectionClosed:
         pass
@@ -127,7 +108,6 @@ async def file_server(websocket, path):
         leave_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has left the document."
         connected_clients.pop(websocket, None)
         await send_to_all(leave_message) # Send a message to all connected clients that the user has left
-        # chat_history.append(leave_message)  
 
         await send_user_list()
 
