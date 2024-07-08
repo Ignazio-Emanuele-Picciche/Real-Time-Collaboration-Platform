@@ -35,7 +35,7 @@
 </div>
 
 <script>
-    const chat = document.getElementById('chat');
+    const status = document.getElementById('status');
     const userlist = document.getElementById('userlist');
     const editor = document.getElementById('editor');
     const usernameInput = document.getElementById('username');
@@ -57,7 +57,7 @@
         ws.onopen = () => {
             editor.disabled = false;
             if (localChanges.length > 0) {
-                console.log('Sending local changes to the server.');
+                console.log('entrato');
                 localChanges.forEach(change => ws.send(JSON.stringify(change)));
             }
         };
@@ -69,6 +69,7 @@
                     reconcileChanges(data.content, data.version);
                 }
             } else {
+                console.log("received non-json message:", event.data);
                 const message = event.data;
 
                 if (message.startsWith("USERS:")) {
@@ -96,8 +97,8 @@
                     chatMessage.appendChild(timestampSpan);
                     chatMessage.appendChild(senderSpan);
                     chatMessage.appendChild(contentSpan);
-                    chat.appendChild(chatMessage);
-                    chat.scrollTop = chat.scrollHeight;
+                    status.appendChild(chatMessage);
+                    status.scrollTop = status.scrollHeight;
                 }
             }
         };
