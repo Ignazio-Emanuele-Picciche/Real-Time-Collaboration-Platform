@@ -144,12 +144,12 @@
  
                 if (isNaN(newVersion)) {
                     editor.value = newContent;
-                } else if (newVersion > version) {
+                } else if (newVersion > version) { // if the new version is greater than the current version means that someone else has made changes, so we update the editor
                     console.log('versione maggiore')
                     editor.value = newContent;
                     version = newVersion;
                     localChanges = [];
-                } else if (newVersion == version) {
+                } else if (newVersion == version) { // if the new version is equal to the current version means that we have made changes, so we apply the changes (and the other change that haver version minor than the current version allign with the current version)
                     console.log('versione uguale')
                     localChanges.forEach(change => applyChange(change));
                 }

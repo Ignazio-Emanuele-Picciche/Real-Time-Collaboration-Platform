@@ -104,6 +104,7 @@ async def file_server(websocket, path):
 
         # Wait for messages from the client
         async for message in websocket:
+            print('!!!!!HELPPP!!!!!')
             data = json.loads(message)
             if data['type'] == 'update':
                 content = data['content']
