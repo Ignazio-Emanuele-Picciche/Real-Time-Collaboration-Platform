@@ -35,6 +35,7 @@ h2 {
    
 }
 
+/* Styling for the subheading */
 h3 {
     background: #89d7d4;
     color: #fff;
@@ -63,6 +64,7 @@ h3 {
     overflow-y: auto;
 }
 
+/* Styling for the userlist */
 #userlist {
     width: 20%;
     padding: 20px;
@@ -71,6 +73,7 @@ h3 {
     margin-top: 20px;
 }
 
+/* Styling for the chat message elements */
 #documentContainer {
     width: 100%;
     padding: 20px;
@@ -92,6 +95,7 @@ h3 {
     margin-bottom: 10px;
 }
 
+/* Styling for the set username and send buttons */
 #setUsername, #send{
     padding: 10px 20px;
     border: none;
@@ -106,6 +110,7 @@ h3 {
     border-right: 1px solid #ddd;
 }
 
+/* Styling for the chat and userlist */
 #documentContainer{
     width: 100%;
     padding: 20px;
@@ -122,6 +127,7 @@ h3 {
     background: #ccc;
 }
 
+/* Styling for the hover effect on the set username button */
 #setUsername:hover:not(:disabled){
     background: #07bade;
 }
@@ -137,6 +143,7 @@ h3 {
     margin: 5px;
 }
 
+/* Styling for the hover effect on the set username button */
 #simulatePartition:hover:not(:disabled), #reconnect:hover:not(:disabled){
     background: #07bade;
 }
