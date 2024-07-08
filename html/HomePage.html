@@ -6,10 +6,10 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+ 
     <div id="chatContainer">
         <title>Document </title>
-        <h2 ">Work document in real-time</h2>
+        <h2>Work document in real-time</h2>
         <div id="usernameInputContainer">
             <input id="username" type="text" placeholder="Enter your username" />
             <button id="setUsername">Set Username</button>
@@ -17,27 +17,27 @@
             <button id="reconnect" disabled>Reconnect</button>
         </div>
             <div id="toggleContainer">
-                
+               
                 <input type="checkbox" id="toggleTimestamps" checked>
                 <label for="toggleTimestamps">Show Timestamps</label>
             </div>
-        
+       
         <div id="chatWrapper">
             <h3 style="font-size: 12px;">Status</h3>
             <div id="chat"></div>
-            
+           
             <h3 style="font-size: 12px;">Online Users</h3>
             <div id="userlist"></div>
         </div>
         <div id="messageInputContainer">
             <h3 style="font-size: 20px;">Shared Document</h3>
-
+ 
             <textarea id="editor" rows="20" cols="100" placeholder="Content Document..." disabled></textarea>
             <!-- <button id="send" disabled>Send</button> -->
         </div>
     </div>
-
-    
+ 
+   
         <script>
             const chat = document.getElementById('chat');
             const userlist = document.getElementById('userlist');
@@ -47,31 +47,31 @@
             const toggleTimestamps = document.getElementById('toggleTimestamps');
             const simulatePartitionButton = document.getElementById('simulatePartition');
             const reconnectButton = document.getElementById('reconnect');
-            
+           
             var username = '';
-
+ 
             let ws = new WebSocket('ws://localhost:4000');
             let localChanges = [];
             let version = 0;
             let isConnected = true;
-
+ 
             // In this method we create a connection with the server
             function connectedWebSocket() {
                 ws = new WebSocket('ws://localhost:4000');
-
+ 
                 ws.onopen = () => {
                     editor.disabled = false;
                     if (localChanges.length > 0) {
                         console.log('entrato')
                         localChanges.forEach(change => ws.send(JSON.stringify(change)));
                     }
-                }; 
-
+                };
+ 
                 ws.onmessage = (event) => {
                     // console.log("prova")
-
+ 
                     // console.log(event.data);
-                    
+                   
                     if (isValidJSON(event.data)) {
                         // Handle JSON messages here
                         console.log('Received JSON message:', event.data)
@@ -84,9 +84,9 @@
                     } else {    
                         // Handle non-JSON messages here, if needed
                         console.log("Received non-JSON message:", event.data);
-
+ 
                         const message = event.data;
-
+ 
                         if (message.startsWith("USERS:")) {
                             // Update user list
                             const users = message.substring(6).split(",");
@@ -94,34 +94,34 @@
                         } else {
                             // Process chat message with ID and timestamp
                             const [id, sender, timestamp, content] = message.split("|");
-
+ 
                             const chatMessage = document.createElement('div');
                             chatMessage.dataset.id = id;
-
+ 
                             const timestampSpan = document.createElement('span');
                             timestampSpan.className = 'timestamp';
                             timestampSpan.textContent = `[${timestamp}] `;
                             timestampSpan.style.display = toggleTimestamps.checked ? 'inline' : 'none';
-
+ 
                             const senderSpan = document.createElement('span');
                             senderSpan.className = 'sender';
                             senderSpan.textContent = `${sender}: `;
-
+ 
                             const contentSpan = document.createElement('span');
                             contentSpan.className = 'content';
                             contentSpan.textContent = content;
-
+ 
                             chatMessage.appendChild(timestampSpan);
                             chatMessage.appendChild(senderSpan);
                             chatMessage.appendChild(contentSpan);
                             chat.appendChild(chatMessage);
                             chat.scrollTop = chat.scrollHeight;
-                        } 
+                        }
                     }
                 };
             }
-
-
+ 
+ 
             // In this method we check if the text is a valid JSON
             function isValidJSON(text) {
                 try {
@@ -131,17 +131,17 @@
                     return false;
                 }
             }
-
+ 
             // ws.onopen = () => {
             //     editor.disabled = false;
             //     sendButton.disabled = false;
             // };
-
+ 
             // In this method we reconcile the changes between the local content and the server content
             function reconcileChanges(newContent, newVersion) {
                 console.log('newVersion'+newVersion)
                 console.log('version'+ version)
-
+ 
                 if (isNaN(newVersion)) {
                     editor.value = newContent;
                 } else if (newVersion > version) {
@@ -154,14 +154,14 @@
                     localChanges.forEach(change => applyChange(change));
                 }
             }
-
+ 
             // In this method we apply the changes to the editor
             function applyChange(change) {
                 editor.value = change.content;
             }
-            
-            
-            // In this method we check if taggle Timestamps is checked or not. 
+           
+           
+            // In this method we check if taggle Timestamps is checked or not.
             // If it is checked we show the timestamp, otherwise we hide it.
             toggleTimestamps.onchange = () => {
                 const timestamps = document.querySelectorAll('.timestamp');
@@ -169,7 +169,7 @@
                     timestamp.style.display = toggleTimestamps.checked ? 'inline' : 'none';
                 });
             };
-
+ 
             // In this method we send the username to the server, if the username is not empty
             setUsernameButton.onclick = () => {
                 username = usernameInput.value;
@@ -181,26 +181,26 @@
                     simulatePartitionButton.disabled = false;
                 }
             };
-
+ 
             // In this method we check if the editor is changed and we send the message to the server
             editor.addEventListener('input', () => {
-                
+               
                 const message = {
                     type: 'update',
                     content: editor.value,
                     version: ++version,
                     username: username
                 };
-
+ 
                 localChanges.push(message);
                 console.log(localChanges)
-
+ 
                 if(isConnected) {
                     ws.send(JSON.stringify(message));
                 }
-                
+               
             });
-
+ 
             // In this method we simulate the partition
             simulatePartitionButton.onclick = () => {
                 ws.close();
@@ -208,7 +208,7 @@
                 reconnectButton.disabled = false;
                 simulatePartitionButton.disabled = true;
             };
-
+ 
             // In this method we reconnect the server
             reconnectButton.onclick = () => {
                 connectedWebSocket();
@@ -216,8 +216,9 @@
                 reconnectButton.disabled = true;
                 simulatePartitionButton.disabled = false;
             };
-
+ 
             connectedWebSocket();
     </script>
 </body>
 </html>
+ 
