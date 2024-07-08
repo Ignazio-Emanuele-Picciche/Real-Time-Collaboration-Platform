@@ -1,172 +1,95 @@
 body {
     font-family: 'Arial', sans-serif;
-    background-color: #f0f0f0;
+    background-color: #f4f4f4;
     margin: 0;
     padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    color: #264653;
+    color: #333;
 }
- 
-/* Styling for the chat container */
+
 #chatContainer {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1000px;
     background: #fff;
-    border-radius: 50px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    margin: 50px;
-    padding: 50px;
-    font-size: 14px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    font-size: 16px;
     text-align: left;
+    margin: 0 auto;
 }
 
-/* Styling for the document container */
-#documentContainer {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-}
-
-/* Styling for the headings */
-h2{
-    width: 100%;
-    max-width: 1200px;
-    background: #2f9794;
-    color: #fff;
-    
-    padding: 15px;
-    text-align: center;
-    border-radius: 5px;
- 
-}
-h4{
-    width: 100%;
-    padding: 10px;
-    max-width: 1200px;
-    background: rgb(126, 214, 211);
-    color: #fff;
-    margin: 0 auto 10px;
-    text-align: center;
-    border-radius: 5px;
-}
-
-/* Special styling for h3 to match h2 */
-h3 {
-    width: 20%;
-    max-width: 1200px;
-    color: #fff;
-    margin: 0 auto 10px;
-    padding: 15px;
-    text-align: center;
-    border-radius: 5px;
-    background: #89d7d4;
-}
-
-/* Styling for the input containers */
-#usernameInputContainer, #toggleContainer{
+#usernameInputContainer, #toggleContainer {
     padding: 20px;
     border-bottom: 1px solid #ddd;
     text-align: center;
-    text-decoration: dashed;
-   
 }
+
 #messageInputContainer {
+    background-color: #fff;
     padding: 20px;
-    border-bottom: 1px solid #ddd;
-    margin: 0 auto 10px;
-    padding: 15px;
-    text-align: center;
-    border-radius: 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-/* Styling for the chat wrapper */
+
+#editor {
+    width: 100%;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: 'Arial', sans-serif;
+    background-color: #e9ecef;
+}
+
 #chatWrapper {
     display: flex;
-    margin-top: 20px;
+    gap: 20px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
- 
-/* Styling for the chat and userlist */
-#status, #userlist {
-    width: 20%;
+
+h2, h4, h3 {
+    margin: 0;
     padding: 10px;
+    color: #ffffff;
+    text-align: center;
+    background-color: #007bff;
+    border-radius: 4px;
+}
+
+#statusWrapper, #userlistWrapper {
+    flex: 1;
+    background-color: #e9ecef;
+    border: none;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+#status, #userlist {
+    background-color: #e9ecef;
+    border: none;
+    border-radius: 4px;
+    padding: 10px;
+    height: 150px; /* Adjust based on your needs */
     overflow-y: auto;
 }
 
-#status {
-    border-right: 1px solid #ddd;
-}
- 
-/* Styling for the chat message elements */
-#status div, #userlist div {
-    margin-bottom: 10px;
-}
-
-/* Styling for the input fields */
-#username, #message {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-bottom: 10px;
-}
-
-/* Styling for the buttons */
 button {
-    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
     border: none;
     border-radius: 4px;
-    background: #a0ecee;
-    color: #070000;
+    padding: 10px 20px;
     cursor: pointer;
-    margin: 5px;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #0056b3;
 }
 
 button:disabled {
-    background: #ccc;
+    background-color: #ccc;
+    cursor: not-allowed;
 }
-
-button:hover:not(:disabled) {
-    background: #07bade;
-}
-
-/* Styling for the timestamp */
-.timestamp {
-    color: #867c7c;
-    font-size: 0.9em;
-    text-align: left;
-}
- 
-/* Styling for the sender name */
-.sender {
-    font-weight: bold;
-}
-
-/* Container for shared document */
-#sharedDocument {
-    width: 100%;
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    text-align: left;
-}
-
-/* Content document styling */
-#contentDocument {
-    width: 100%;
-    max-width: 1200px;
-    min-height: 200px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    te
-}
- 
- 
