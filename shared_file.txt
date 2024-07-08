@@ -3,7 +3,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec semper justo
 ciao
 ciao
 
-ooà
+ooï¿½
 =======
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec semper justo. Sed euismod, nisl id lacinia tincidunt, velit nunc consequat nunc, vitae luctus mauris nisl id lectus. Fusce auctor, mauris id tincidunt tincidunt, mauris nisl ultrices nunc, nec lacinia nunc nunc id nunc.
->>>>>>> d84a21b3be962f085a21b9448065a8633fdc331f
+
+ciao ciao
+come stai?
