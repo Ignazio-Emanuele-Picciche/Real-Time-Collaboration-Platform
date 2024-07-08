@@ -81,6 +81,17 @@ async def file_server(websocket, path):
         await websocket.send("Welcome to the Shared File! Please enter your name:")
         username = await websocket.recv() # Wait for the client to send their username
 
+        try:
+            username = json.loads(username)
+            
+            if isinstance(username, dict):
+                username = str(username['username']) 
+            else:
+                username = str(username)
+                
+        except json.JSONDecodeError:
+            print('Error decoding JSON')
+
         connected_clients[websocket] = username
         # await send_chat_history(websocket) # Send chat history to the new client
         join_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has joined the document."
@@ -98,7 +109,7 @@ async def file_server(websocket, path):
                 content = data['content']
                 version = data['version']
 
-                print('\n'+str(version)+'\n')
+                # print('\n'+str(version)+'\n')
 
                 await save_file(content)
                 await broadcast({"type": "content", "content": content, "version": version})
