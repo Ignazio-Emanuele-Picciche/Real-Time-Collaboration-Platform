@@ -1,5 +1,4 @@
-/* Styling for the body */
-body { 
+body {
     font-family: 'Arial', sans-serif;
     background-color: #d1d0d0;
     margin: 0;
@@ -10,7 +9,7 @@ body {
     height: 100vh;
     color: #264653;
 }
-
+ 
 /* Styling for the chat container */
 #chatContainer {
     width: 100%;
@@ -27,14 +26,8 @@ h2 {
     margin: 0;
     padding: 20px;
     text-align: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-   width: 100%;
-    z-index: 1;
-   
 }
-
+ 
 /* Styling for the subheading */
 h3 {
     background: #89d7d4;
@@ -43,19 +36,19 @@ h3 {
     padding: 20px;
     text-align: center;
 }
-
+ 
 /* Styling for the username input container, toggle container, and message input container */
 #usernameInputContainer, #toggleContainer, #messageInputContainer{
     padding: 20px;
     border-bottom: 1px solid #ddd;
 }
-
+ 
 /* Styling for the chat wrapper */
 #chatWrapper {
     display: flex;
     border-bottom: 1px solid #ddd;
 }
-
+ 
 /* Styling for the chat and userlist */
 #chat {
     width: 50%;
@@ -63,7 +56,7 @@ h3 {
     border-right: 1px solid #ddd;
     overflow-y: auto;
 }
-
+ 
 /* Styling for the userlist */
 #userlist {
     width: 20%;
@@ -72,7 +65,7 @@ h3 {
     overflow-y: auto;
     margin-top: 20px;
 }
-
+ 
 /* Styling for the chat message elements */
 #documentContainer {
     width: 100%;
@@ -80,12 +73,12 @@ h3 {
     display: flex;
     flex-direction: column;
 }
-
+ 
 /* Styling for the chat message elements */
 #chat div, #userlist div {
     margin-bottom: 10px;
 }
-
+ 
 /* Styling for the username and message input fields */
 #username, #message {
     width: 100%;
@@ -94,7 +87,7 @@ h3 {
     border-radius: 4px;
     margin-bottom: 10px;
 }
-
+ 
 /* Styling for the set username and send buttons */
 #setUsername, #send{
     padding: 10px 20px;
@@ -104,12 +97,12 @@ h3 {
     color: #070000;
     cursor: piointer;
 }
-
+ 
 /* Styling for the chat messages */
 #chat {
     border-right: 1px solid #ddd;
 }
-
+ 
 /* Styling for the chat and userlist */
 #documentContainer{
     width: 100%;
@@ -117,7 +110,7 @@ h3 {
     display: flex;
     flex-direction: column;
 }
-
+ 
 /* Styling for the chat message elements */
 #chat div, #userlist div {
     margin-bottom: 10px;
@@ -126,12 +119,12 @@ h3 {
 #setUsername:disabled, #send:disabled, #simulatePartition:disabled, #reconnect:disabled {
     background: #ccc;
 }
-
+ 
 /* Styling for the hover effect on the set username button */
 #setUsername:hover:not(:disabled){
     background: #07bade;
 }
-
+ 
 #simulatePartition, #reconnect {
     padding: 10px 20px;
     border: none;
@@ -142,7 +135,7 @@ h3 {
     font-size: 0.8rem;
     margin: 5px;
 }
-
+ 
 /* Styling for the hover effect on the set username button */
 #simulatePartition:hover:not(:disabled), #reconnect:hover:not(:disabled){
     background: #07bade;
@@ -152,15 +145,17 @@ h3 {
     color: #867c7c;
     font-size: 0.9em;
 }
-
+ 
 /* Styling for the sender name */
 .sender {
     font-weight: bold;
 }
-
+ 
 /* Styling for the chat message */
 .container {
     width: 80%;
     margin: auto;
     overflow: hidden;
 }
+ 
+ 
