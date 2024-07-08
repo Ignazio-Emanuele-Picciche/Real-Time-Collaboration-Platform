@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>work Document real time </title>
+    <title>Work Document Real-Time</title>
     <style>
-        /* Styling for the body */
         body { 
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
@@ -16,7 +15,6 @@
             height: 100vh;
         }
         
-        /* Styling for the chat container */
         #chatContainer {
             width: 80%;
             max-width: 800px;
@@ -26,7 +24,6 @@
             overflow: hidden;
         }
         
-        /* Styling for the heading */
         h2 {
             background: #61baff;
             color: #fff;
@@ -34,6 +31,7 @@
             padding: 20px;
             text-align: center;
         }
+        
         h3 {
             background: #0033fe;
             color: #fff;
@@ -42,36 +40,30 @@
             text-align: center;
         }
         
-        /* Styling for the username input container, toggle container, and message input container */
         #usernameInputContainer, #toggleContainer, #messageInputContainer {
             padding: 20px;
             border-bottom: 1px solid #ddd;
         }
         
-        /* Styling for the chat wrapper */
         #chatWrapper {
             display: flex;
             border-bottom: 1px solid #ddd;
         }
         
-        /* Styling for the chat and userlist */
         #chat, #userlist {
             width: 50%;
             padding: 20px;
             overflow-y: auto;
         }
         
-        /* Styling for the chat messages */
         #chat {
             border-right: 1px solid #ddd;
         }
         
-        /* Styling for the chat message elements */
         #chat div, #userlist div {
             margin-bottom: 10px;
         }
         
-        /* Styling for the username and message input fields */
         #username, #message {
             width: calc(100% - 20px);
             padding: 10px;
@@ -80,7 +72,6 @@
             margin-bottom: 10px;
         }
         
-        /* Styling for the set username and send buttons */
         #setUsername, #send {
             padding: 10px 20px;
             border: none;
@@ -90,201 +81,149 @@
             cursor: pointer;
         }
         
-        /* Styling for the disabled set username and send buttons */
         #setUsername:disabled, #send:disabled {
             background: #ccc;
         }
         
-        /* Styling for the timestamp */
         .timestamp {
             color: #888;
             font-size: 0.9em;
         }
         
-        /* Styling for the sender name */
         .sender {
             font-weight: bold;
         }
     </style>
 </head>
 <body>
-
     <div id="chatContainer">
-        <title>Document </title>
-        <h2 ">Work document in real-time</h2>
+        <h2>Work Document in Real-Time</h2>
         <div id="usernameInputContainer">
             <input id="username" type="text" placeholder="Enter your username" />
             <button id="setUsername">Set Username</button>
             <button id="simulatePartition">Simulate Partition</button>
-            <button id="reconnect">Reconnect</button>
+            <button id="reconnect" disabled>Reconnect</button>
         </div>
-            <div id="toggleContainer">
-                
-                <input type="checkbox" id="toggleTimestamps" checked>
-                <label for="toggleTimestamps">Show Timestamps</label>
-            </div>
-        
+        <div id="toggleContainer">
+            <input type="checkbox" id="toggleTimestamps" checked>
+            <label for="toggleTimestamps">Show Timestamps</label>
+        </div>
         <div id="chatWrapper">
-            <h3 style="font-size: 12px;">Status</h3>
-            <div id="chat"></div>
-            
-            <h3 style="font-size: 12px;">Online Users</h3>
-            <div id="userlist"></div>
+            <div>
+                <h3 style="font-size: 12px;">Status</h3>
+                <div id="chat"></div>
+            </div>
+            <div>
+                <h3 style="font-size: 12px;">Online Users</h3>
+                <div id="userlist"></div>
+            </div>
         </div>
         <div id="messageInputContainer">
             <h3 style="font-size: 20px;">Shared Document</h3>
-
             <textarea id="editor" rows="20" cols="100" placeholder="Content Document..." disabled></textarea>
-            <!-- <button id="send" disabled>Send</button> -->
         </div>
     </div>
 
-    
-        <script>
-            const chat = document.getElementById('chat');
-            const userlist = document.getElementById('userlist');
-            const editor = document.getElementById('editor');
-            // const sendButton = document.getElementById('send');
-            const usernameInput = document.getElementById('username');
-            const setUsernameButton = document.getElementById('setUsername');
-            const toggleTimestamps = document.getElementById('toggleTimestamps');
-            const simulatePartitionButton = document.getElementById('simulatePartition');
-            const reconnectButton = document.getElementById('reconnect');
+    <script>
+        const chat = document.getElementById('chat');
+        const userlist = document.getElementById('userlist');
+        const editor = document.getElementById('editor');
+        const usernameInput = document.getElementById('username');
+        const setUsernameButton = document.getElementById('setUsername');
+        const toggleTimestamps = document.getElementById('toggleTimestamps');
+        const simulatePartitionButton = document.getElementById('simulatePartition');
+        const reconnectButton = document.getElementById('reconnect');
 
-            let ws = new WebSocket('ws://localhost:4000');
-            let localChanges = [];
-            let version = 0;
-            let isConnected = true;
+        let ws;
+        let localChanges = [];
+        let version = 0;
+        let isConnected = true;
 
-            // In this method we create a connection with the server
-            function connectedWebSocket() {
-                ws = new WebSocket('ws://localhost:4000');
-                ws.onopen = () => {
-                    editor.disabled = false;
-                    if (localChanges.length > 0) {
-                        console.log(localChanges)
-                        localChanges.forEach(change => ws.send(JSON.stringify(change)));
-                    }
-                }; 
+        // Create a connection with the server
+        function connectedWebSocket() {
+            ws = new WebSocket('ws://localhost:4000');
+            ws.onopen = () => {
+                editor.disabled = false;
+                ws.send(JSON.stringify({ type: 'requestUserList' }));
 
-                ws.onmessage = (event) => {
-                    // console.log("prova")
-
-                    // console.log(event.data);
-                    
-                    if (isValidJSON(event.data)) {
-                        // Handle JSON messages here
-                        const data = JSON.parse(event.data);
-                        if (data.type === 'content') {
-                            //editor.value = data.content;
-                            console.log(data.version)
-                            reconcileChanges(data.content, data.version+1)
-                        }
-                    } else {    
-                        // Handle non-JSON messages here, if needed
-                        console.log("Received non-JSON message:", event.data);
-
-                        const message = event.data;
-
-                        if (message.startsWith("USERS:")) {
-                            // Update user list
-                            const users = message.substring(6).split(",");
-                            userlist.innerHTML = users.join("<br>");
-                        } else {
-                            // Process chat message with ID and timestamp
-                            const [id, sender, timestamp, content] = message.split("|");
-
-                            const chatMessage = document.createElement('div');
-                            chatMessage.dataset.id = id;
-
-                            const timestampSpan = document.createElement('span');
-                            timestampSpan.className = 'timestamp';
-                            timestampSpan.textContent = `[${timestamp}] `;
-                            timestampSpan.style.display = toggleTimestamps.checked ? 'inline' : 'none';
-
-                            const senderSpan = document.createElement('span');
-                            senderSpan.className = 'sender';
-                            senderSpan.textContent = `${sender}: `;
-
-                            const contentSpan = document.createElement('span');
-                            contentSpan.className = 'content';
-                            contentSpan.textContent = content;
-
-                            chatMessage.appendChild(timestampSpan);
-                            chatMessage.appendChild(senderSpan);
-                            chatMessage.appendChild(contentSpan);
-                            chat.appendChild(chatMessage);
-                            chat.scrollTop = chat.scrollHeight;
-                        } 
-                    }
-                };
-            }
-                
-          
-        
-            // In this method we check if the text is a valid JSON
-            function isValidJSON(text) {
-                try {
-                    JSON.parse(text);
-                    return true;
-                } catch {
-                    return false;
-                }
-            }
-
-            // ws.onopen = () => {
-            //     editor.disabled = false;
-            //     sendButton.disabled = false;
-            // };
-
-            // In this method we reconcile the changes between the local content and the server content
-            function reconcileChanges(newContent, newVersion) {
-                console.log('newVersion'+newVersion)
-                console.log('version'+ version)
-
-                if (isNaN(newVersion)) {
-                    editor.value = newContent;
-                } else if (newVersion > version) {
-                    console.log('versione maggiore')
-                    editor.value = newContent;
-                    version = newVersion;
-                    localChanges = [];
-                } else if (newVersion == version) {
-                    localChanges.forEach(change => applyChange(change));
-                }
-            }
-
-            // In this method we apply the changes to the editor
-            function applyChange(change) {
-                editor.value = change.content;
-            }
-            
-            
-            // In this method we check if taggle Timestamps is checked or not. 
-            // If it is checked we show the timestamp, otherwise we hide it.
-            toggleTimestamps.onchange = () => {
-                const timestamps = document.querySelectorAll('.timestamp');
-                timestamps.forEach(timestamp => {
-                    timestamp.style.display = toggleTimestamps.checked ? 'inline' : 'none';
-                });
-            };
-
-            // In this method we send the username to the server, if the username is not empty
-            setUsernameButton.onclick = () => {
-                const username = usernameInput.value;
-                if (username) {
-                    ws.send(username);
-                    usernameInput.disabled = true;
-                    setUsernameButton.disabled = true;
-                    editor.disabled = false;
-                    // input.disabled = false;
-                    // sendButton.disabled = false;
+                if (localChanges.length > 0) {
+                    localChanges.forEach(change => ws.send(JSON.stringify(change)));
                 }
             };
 
-            // In this method we check if the editor is changed and we send the message to the server
-            editor.addEventListener('input', () => {
-                if (isConnected) {
+            ws.onmessage = (event) => {
+                if (isValidJSON(event.data)) {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'content') {
+                        reconcileChanges(data.content, data.version);
+                    } else if (data.type === 'userList') {
+                        updateUserList(data.users);
+                    }
+                } else {
+                    console.log("Received non-JSON message:", event.data);
+                }
+            };
+        }
+
+        // In this method we check if the text is a valid JSON
+        function isValidJSON(text) {
+            try {
+                JSON.parse(text);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        // In this method we reconcile the changes between the local content and the server content
+        function reconcileChanges(newContent, newVersion) {
+            console.log('newVersion' + newVersion);
+            console.log('version' + version);
+
+            if (isNaN(newVersion)) {
+                editor.value = newContent;
+            } else if (newVersion > version) {
+                console.log('versione maggiore');
+                editor.value = newContent;
+                version = newVersion;
+                localChanges = [];
+            } else if (newVersion == version) {
+                localChanges.forEach(change => applyChange(change));
+            }
+        }
+
+        // In this method we apply the changes to the editor
+        function applyChange(change) {
+            editor.value = change.content;
+        }
+
+        // In this method we update the user list
+        function updateUserList(users) {
+            userlist.innerHTML = users.join("<br>");
+        }
+
+        // Toggle the display of timestamps
+        toggleTimestamps.onchange = () => {
+            const timestamps = document.querySelectorAll('.timestamp');
+            timestamps.forEach(timestamp => {
+                timestamp.style.display = toggleTimestamps.checked ? 'inline' : 'none';
+            });
+        };
+
+        // Set the username
+        setUsernameButton.onclick = () => {
+            const username = usernameInput.value;
+            if (username) {
+                ws.send(JSON.stringify({ type: 'setUsername', username }));
+                usernameInput.disabled = true;
+                setUsernameButton.disabled = true;
+                editor.disabled = false;
+            }
+        };
+
+        // Detect changes in the editor
+        editor.addEventListener('input', () => {
+            if (isConnected) {
                 const message = {
                     type: 'update',
                     content: editor.value,
@@ -292,41 +231,26 @@
                 };
                 localChanges.push(message);
                 ws.send(JSON.stringify(message));
-                // console.log('ciccio')
-                }
-            });
+            }
+        });
 
-            // In this method we simulate the partition
-            simulatePartitionButton.onclick = () => {
-                ws.close();
-                isConnected = false;
-                reconnectButton.disabled = false;
-                simulatePartitionButton.disabled = true;
-            };
+        // Simulate a network partition
+        simulatePartitionButton.onclick = () => {
+            ws.close();
+            isConnected = false;
+            reconnectButton.disabled = false;
+            simulatePartitionButton.disabled = true;
+        };
 
-            // In this method we reconnect the server
-            reconnectButton.onclick = () => {
-                connectedWebSocket();
-                isConnected = true;
-                reconnectButton.disabled = true;
-                simulatePartitionButton.disabled = false;
-            };
-
+        // Reconnect to the server
+        reconnectButton.onclick = () => {
             connectedWebSocket();
+            isConnected = true;
+            reconnectButton.disabled = true;
+            simulatePartitionButton.disabled = false;
+        };
 
-            // sendButton.onclick = () => {
-            //     const message = input.value;
-            //     if (message) {
-            //         ws.send(message);
-            //         input.value = '';
-            //     }
-            // };
-
-            // input.addEventListener('keydown', (e) => {
-            //     if (e.key === 'Enter') {
-            //         sendButton.click();
-            //     }
-            // });
+        connectedWebSocket();
     </script>
 </body>
 </html>
