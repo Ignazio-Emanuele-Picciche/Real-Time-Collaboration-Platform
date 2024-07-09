@@ -2,44 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>work Document real time </title>
+    <title>Work Document in Real Time</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
- 
-    <div id="chatContainer">
-        <title>Document </title>
-        <h2>Work document in real-time</h2>
-        <div id="usernameInputContainer">
-            <input id="username" type="text" placeholder="Enter your username" />
-            <button id="setUsername">Set Username</button>
-            <button id="simulatePartition" disabled>Simulate Partition</button>
-            <button id="reconnect" disabled>Reconnect</button>
+<div id="chatContainer">
+    <h2>Work Document in Real-Time</h2>
+    <div id="usernameInputContainer">
+        <input id="username" type="text" placeholder="Enter your username" style="width: 100%;" />
+        <button id="setUsername" style="margin: 1%;">Set Username</button>
+        <button id="simulatePartition" style="margin: 1%;" disabled>Simulate Partition</button>
+        <button id="reconnect" style="margin: 1%;" disabled>Reconnect</button>
+    </div>
+    <div id="toggleContainer">
+        <input type="checkbox" id="toggleTimestamps" checked>
+        <label for="toggleTimestamps">Show Timestamps</label>
+    </div>
+    <div id="messageInputContainer">
+        <h4>Shared Document</h4>
+        <textarea id="editor" rows="20" placeholder="Content Document..."></textarea>
+    </div>
+    <div id="chatWrapper">
+        <div id="statusWrapper">
+            <h3>Status</h3>
+            <div id="status"></div>
         </div>
-            <div id="toggleContainer">
-               
-                <input type="checkbox" id="toggleTimestamps" checked>
-                <label for="toggleTimestamps" style="text-align: left;">Show Timestamps</label>
-            </div>
-       
-        <div id="chatWrapper">
-            <h3 style="font-size: 12px;">Status</h3>
-            <div id="chat"></div>
-           
-            <h3 style="font-size: 12px;">Online Users</h3>
+        <div id="userlistWrapper">
+            <h3>Online Users</h3>
             <div id="userlist"></div>
-        </div>
-        <div id="messageInputContainer">
-            <h4 style="font-size: 20px;">Shared Document</h4>
- 
-            <textarea id="editor" rows="20" cols="100" placeholder="Content Document..."></textarea>
-            <!-- <button id="send" disabled>Send</button> -->
         </div>
     </div>
  
    
         <script>
-            const chat = document.getElementById('chat');
+            const status = document.getElementById('status');
             const userlist = document.getElementById('userlist');
             const editor = document.getElementById('editor');
             const usernameInput = document.getElementById('username');
@@ -114,8 +110,8 @@
                             chatMessage.appendChild(timestampSpan);
                             chatMessage.appendChild(senderSpan);
                             chatMessage.appendChild(contentSpan);
-                            chat.appendChild(chatMessage);
-                            chat.scrollTop = chat.scrollHeight;
+                            status.appendChild(chatMessage);
+                            status.scrollTop = status.scrollHeight;
                         }
                     }
                 };
@@ -221,5 +217,3 @@
     </script>
 </body>
 </html>
- 
- 
