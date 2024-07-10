@@ -73,7 +73,6 @@
                         console.log('Received JSON message:', event.data)
                         const data = JSON.parse(event.data);
                         if (data.type === 'content') {
-                            // reconcileChanges(data.content, data.version)
                             editor.value = data.content;
                         }
                     } else {    
@@ -126,19 +125,7 @@
                     return false;
                 }
             }
- 
-            // In this method we reconcile the changes between the local content and the server content
-            function reconcileChanges(newContent, newVersion) {
-                if (isNaN(newVersion)) {
-                    editor.value = newContent;
-                } else if (newVersion > version) {
-                    editor.value = newContent;
-                    version = newVersion;
-                    localChanges = [];
-                } else if (newVersion == version) {
-                    localChanges.forEach(change => applyChange(change));
-                }
-            }
+            
  
             // In this method we apply the changes to the editor
             function applyChange(change) {

@@ -9,9 +9,7 @@ import difflib
 
 connected_clients = {} # Dictionary to store the connected clients
 FILE_PATH = "shared_file.txt" # Path to the shared file
-
-
-crdt = CRDT()
+crdt = CRDT() # Create an instance of the CRDT class
 
 async def send_to_all(message):
     """
@@ -186,6 +184,8 @@ def crdt_operations(old_text, new_text):
             operations.append({'type': 'insert', 'index': i, 'char': new_text[i]})
         
     return operations
+
+
 
 # Start the server
 start_server = websockets.serve(file_server, 'localhost',4000) 
