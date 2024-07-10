@@ -114,7 +114,7 @@ async def file_server(websocket, path):
             await websocket.send(json.dumps({"type": "content", "content": content})) # Send the contents of the shared file to the client
         else: 
             content = messageRecv['content']
-            updated_content = diffReconnect(crdt.get_document(), content)
+            updated_content = network_partition_consistency(crdt.get_document(), content)
             await save_file(updated_content)
             await broadcast({"type": "content", "content": updated_content, "version": None})
 
@@ -125,7 +125,7 @@ async def file_server(websocket, path):
             if data['type'] == 'update':
                 content = data['content']
                 version = data['version']
-                operations = diff(crdt.get_document(), content)
+                operations = crdt_operations(crdt.get_document(), content)
                 for op in operations:
                     crdt.apply_operation(op)
                 await save_file(crdt.get_document())
@@ -142,24 +142,37 @@ async def file_server(websocket, path):
         await send_user_list()
 
 
-def diffReconnect(text1, text2):
-    # Utilizzare SequenceMatcher per trovare le differenze
-    matcher = difflib.SequenceMatcher(None, text1, text2)
+def network_partition_consistency(onlineText, offlineText):
+    # Use SequenceMatcher to find differences
+    # SequenceMatcher is a class from the difflib module that helps to compare sequences of any type
+    matcher = difflib.SequenceMatcher(None, onlineText, offlineText)
     result = []
     
+    # Get and iterate through the operations (or "opcodes") that describe how to transform text1 into text2
     for opcode in matcher.get_opcodes():
+        # Each opcode is a tuple containing: (tag, i1, i2, j1, j2)
+        # tag: type of operation (equal, replace, delete, insert)
+        # i1, i2: start and end index in onlineText
+        # j1, j2: start and end index in offlineText
         tag, i1, i2, j1, j2 = opcode
-        if tag == 'equal':
-            result.append(text1[i1:i2])
-        elif tag == 'replace':
-            result.append(text1[i1:i2])
-            result.append(text2[j1:j2])
-        elif tag == 'delete':
-            result.append(text1[i1:i2])
-        elif tag == 'insert':
-            result.append(text2[j1:j2])
         
+        # If the parts are equal, add them to the result without changes
+        if tag == 'equal':
+            result.append(onlineText[i1:i2])
+        # If there's a replacement, add both the text from onlineText and offlineText
+        elif tag == 'replace':
+            result.append(onlineText[i1:i2])
+            result.append(offlineText[j1:j2])
+        # If there's a deletion, add the text from onlineText
+        elif tag == 'delete':
+            result.append(onlineText[i1:i2])
+        # If there's an insertion, add the text from offlineText
+        elif tag == 'insert':
+            result.append(offlineText[j1:j2])
+        
+    # Join all the pieces of text in the result and return it
     return ''.join(result)
+
 
 '''
     This method calculates the difference between two strings and returns a list of operations to transform the old string into the new string
@@ -171,7 +184,7 @@ def diffReconnect(text1, text2):
     Returns:
         operations: A list of operations to transform the old string into the new string
 '''
-def diff(old_text, new_text):
+def crdt_operations(old_text, new_text):
     print('\nOld Text:', old_text)
     print('\nNew Text:', new_text)
     operations = []
