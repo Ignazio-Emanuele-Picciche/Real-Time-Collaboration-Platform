@@ -58,7 +58,9 @@
                 ws.onopen = () => {
                     editor.disabled = false;
                     if (localChanges.length > 0) {
+                        // console.log(editor.value);
                         localChanges.forEach(change => ws.send(JSON.stringify(change)));
+                        localChanges = []; // after sending the changes, we clear the local changes
                     }
                 };
  
@@ -68,7 +70,8 @@
                         console.log('Received JSON message:', event.data)
                         const data = JSON.parse(event.data);
                         if (data.type === 'content') {
-                            reconcileChanges(data.content, data.version)
+                            // reconcileChanges(data.content, data.version)
+                            editor.value = data.content;
                         }
                     } else {    
                         // Handle non-JSON messages here, if needed
@@ -153,7 +156,7 @@
             setUsernameButton.onclick = () => {
                 username = usernameInput.value;
                 if (username) {
-                    ws.send(JSON.stringify({ username }));
+                    ws.send(JSON.stringify({username}));
                     usernameInput.disabled = true;
                     setUsernameButton.disabled = true;
                     editor.disabled = false;
@@ -169,9 +172,9 @@
                     version: ++version,
                     username: username
                 };
- 
+                
                 localChanges.push(message);
- 
+
                 if(isConnected) {
                     ws.send(JSON.stringify(message));
                 }
