@@ -58,7 +58,6 @@
                 ws.onopen = () => {
                     editor.disabled = false;
                     if (localChanges.length > 0) {
-                        // console.log(editor.value);
                         newContent = localChanges[localChanges.length - 1];
                         newContent.type = 'reconnect';
                         ws.send(JSON.stringify(newContent));
@@ -125,7 +124,7 @@
                     return false;
                 }
             }
-            
+
  
             // In this method we apply the changes to the editor
             function applyChange(change) {
