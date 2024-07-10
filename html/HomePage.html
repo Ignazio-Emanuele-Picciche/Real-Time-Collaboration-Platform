@@ -59,7 +59,10 @@
                     editor.disabled = false;
                     if (localChanges.length > 0) {
                         // console.log(editor.value);
-                        localChanges.forEach(change => ws.send(JSON.stringify(change)));
+                        newContent = localChanges[localChanges.length - 1];
+                        newContent.type = 'reconnect';
+                        ws.send(JSON.stringify(newContent));
+                        // localChanges.forEach(change => ws.send(JSON.stringify(change)));
                         localChanges = []; // after sending the changes, we clear the local changes
                     }
                 };
@@ -156,7 +159,7 @@
             setUsernameButton.onclick = () => {
                 username = usernameInput.value;
                 if (username) {
-                    ws.send(JSON.stringify({username}));
+                    ws.send(username);
                     usernameInput.disabled = true;
                     setUsernameButton.disabled = true;
                     editor.disabled = false;

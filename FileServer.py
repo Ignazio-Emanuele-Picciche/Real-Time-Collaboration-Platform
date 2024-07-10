@@ -4,7 +4,7 @@ import json
 import os
 from datetime import datetime
 import websockets
-
+import difflib
 
 connected_clients = {} # Dictionary to store the connected clients
 FILE_PATH = "shared_file.txt" # Path to the shared file
@@ -89,14 +89,16 @@ async def file_server(websocket, path):
 
     try:
         await websocket.send("Welcome to the Shared File! Please enter your name:")
-        username = await websocket.recv() # Wait for the client to send their username
+        messageRecv = await websocket.recv() # Wait for the client to send their username
+        type = ''
 
         try:
-            username = json.loads(username)
-            if isinstance(username, dict):
-                username = str(username['username']) 
+            messageRecv = json.loads(messageRecv)
+            if isinstance(messageRecv, dict):
+                username = str(messageRecv['username'])
+                type = str(messageRecv['type']) 
             else:
-                username = str(username)
+                username = str(messageRecv)
         except json.JSONDecodeError:
             print('Error decoding JSON')
 
@@ -107,7 +109,15 @@ async def file_server(websocket, path):
 
         await send_user_list() # Update user list to all connected clients
         content = await load_file() # Load the contents of the shared file
-        await websocket.send(json.dumps({"type": "content", "content": content})) # Send the contents of the shared file to the client
+
+        if(type != 'reconnect'):
+            await websocket.send(json.dumps({"type": "content", "content": content})) # Send the contents of the shared file to the client
+        else: 
+            content = messageRecv['content']
+            updated_content = diffReconnect(crdt.get_document(), content)
+            await save_file(updated_content)
+            await broadcast({"type": "content", "content": updated_content, "version": None})
+
 
         # Wait for messages from the client
         async for message in websocket:
@@ -130,6 +140,26 @@ async def file_server(websocket, path):
         connected_clients.pop(websocket, None)
         await send_to_all(leave_message) # Send a message to all connected clients that the user has left
         await send_user_list()
+
+
+def diffReconnect(text1, text2):
+    # Utilizzare SequenceMatcher per trovare le differenze
+    matcher = difflib.SequenceMatcher(None, text1, text2)
+    result = []
+    
+    for opcode in matcher.get_opcodes():
+        tag, i1, i2, j1, j2 = opcode
+        if tag == 'equal':
+            result.append(text1[i1:i2])
+        elif tag == 'replace':
+            result.append(text1[i1:i2])
+            result.append(text2[j1:j2])
+        elif tag == 'delete':
+            result.append(text1[i1:i2])
+        elif tag == 'insert':
+            result.append(text2[j1:j2])
+        
+    return ''.join(result)
 
 '''
     This method calculates the difference between two strings and returns a list of operations to transform the old string into the new string
