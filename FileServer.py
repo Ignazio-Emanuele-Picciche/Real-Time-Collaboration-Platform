@@ -7,8 +7,29 @@ import websockets
 
 
 connected_clients = {} # Dictionary to store the connected clients
-chat_history = [] # List to store the chat history
 FILE_PATH = "shared_file.txt" # Path to the shared file
+
+class CRDT:
+    """
+        This class implements the CRDT data structure for the shared file
+    """
+    def __init__(self):
+        self.document = ""
+        self.operations =[]
+    
+    # Method to generate a unique identifier for an operation
+    def apply_operation(self, operation):
+        if operation['type'] == 'insert':
+            self.document = self.document[:operation['index']] + operation['char'] + self.document[operation['index']:]
+        elif operation['type'] == 'delete':
+            self.document = self.document[:operation['index']] + self.document[operaton['index'] +1:]
+            self.operations.append(operation)
+    
+    # Method to apply an operation to the document
+    def get_document(self):
+        return self.document
+
+crdt = CRDT()
 
 async def send_to_all(message):
     """
@@ -97,8 +118,11 @@ async def file_server(websocket, path):
             if data['type'] == 'update':
                 content = data['content']
                 version = data['version']
-                await save_file(content)
-                await broadcast({"type": "content", "content": content, "version": version})
+                operations = diff(crdt.get_document(), content)
+                for op in operations:
+                    crdt.apply_operation(op)
+                await save_file(crdt.get_document())
+                await broadcast({"type": "content", "content": crdt.get_document(), "version": version})
  
     except websockets.ConnectionClosed:
         pass
@@ -108,9 +132,37 @@ async def file_server(websocket, path):
         leave_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has left the document."
         connected_clients.pop(websocket, None)
         await send_to_all(leave_message) # Send a message to all connected clients that the user has left
-
         await send_user_list()
 
+'''
+    This method calculates the difference between two strings and returns a list of operations to transform the old string into the new string
+    
+    Args:
+        old_text: The old string
+        new_text: The new string
+    
+    Returns:
+        operations: A list of operations to transform the old string into the new string
+'''
+def diff(old_text, new_text):
+    operations = []
+    len_old, len_new = len(old_text), len(new_text)
+    min_len = min(len_old, len_new)
+
+    for i in range (min_len):
+        if old_text[i] != new_text[i]:
+            operations.append({'type': 'delete', 'index': i})
+            operations.append({'type': 'insert', 'index': i, 'char': new_text[i]})
+        
+    if len_old > len_new:
+        for i in range (min_len, len_old):
+            operations.append({'type': 'delete', 'index': min_len})
+    
+    elif len_new > len_old:
+        for i in range (min_len, len_new):
+            operations.append({'type': 'insert', 'index': i, 'char': new_text[i]})
+        
+    return operations
 
 # Start the server
 start_server = websockets.serve(file_server, 'localhost',4000) 
