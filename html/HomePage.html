@@ -58,23 +58,16 @@
                 ws.onopen = () => {
                     editor.disabled = false;
                     if (localChanges.length > 0) {
-                        console.log('entrato')
                         localChanges.forEach(change => ws.send(JSON.stringify(change)));
                     }
                 };
  
                 ws.onmessage = (event) => {
-                    // console.log("prova")
- 
-                    // console.log(event.data);
-                   
                     if (isValidJSON(event.data)) {
                         // Handle JSON messages here
                         console.log('Received JSON message:', event.data)
                         const data = JSON.parse(event.data);
                         if (data.type === 'content') {
-                            //editor.value = data.content;
-                            // console.log(data.version)
                             reconcileChanges(data.content, data.version)
                         }
                     } else {    
@@ -91,8 +84,8 @@
                             // Process chat message with ID and timestamp
                             const [id, sender, timestamp, content] = message.split("|");
  
-                            const chatMessage = document.createElement('div');
-                            chatMessage.dataset.id = id;
+                            const statusHistory = document.createElement('div');
+                            statusHistory.dataset.id = id;
  
                             const timestampSpan = document.createElement('span');
                             timestampSpan.className = 'timestamp';
@@ -107,10 +100,10 @@
                             contentSpan.className = 'content';
                             contentSpan.textContent = content;
  
-                            chatMessage.appendChild(timestampSpan);
-                            chatMessage.appendChild(senderSpan);
-                            chatMessage.appendChild(contentSpan);
-                            status.appendChild(chatMessage);
+                            statusHistory.appendChild(timestampSpan);
+                            statusHistory.appendChild(senderSpan);
+                            statusHistory.appendChild(contentSpan);
+                            status.appendChild(statusHistory);
                             status.scrollTop = status.scrollHeight;
                         }
                     }
@@ -128,25 +121,15 @@
                 }
             }
  
-            // ws.onopen = () => {
-            //     editor.disabled = false;
-            //     sendButton.disabled = false;
-            // };
- 
             // In this method we reconcile the changes between the local content and the server content
             function reconcileChanges(newContent, newVersion) {
-                console.log('newVersion'+newVersion)
-                console.log('version'+ version)
- 
                 if (isNaN(newVersion)) {
                     editor.value = newContent;
                 } else if (newVersion > version) {
-                    console.log('versione minore')
                     editor.value = newContent;
                     version = newVersion;
                     localChanges = [];
                 } else if (newVersion == version) {
-                    console.log('versione uguale')
                     localChanges.forEach(change => applyChange(change));
                 }
             }
@@ -170,7 +153,7 @@
             setUsernameButton.onclick = () => {
                 username = usernameInput.value;
                 if (username) {
-                    ws.send(username);
+                    ws.send(JSON.stringify({ username }));
                     usernameInput.disabled = true;
                     setUsernameButton.disabled = true;
                     editor.disabled = false;
@@ -180,7 +163,6 @@
  
             // In this method we check if the editor is changed and we send the message to the server
             editor.addEventListener('input', () => {
-               
                 const message = {
                     type: 'update',
                     content: editor.value,
@@ -189,12 +171,10 @@
                 };
  
                 localChanges.push(message);
-                console.log(localChanges)
  
                 if(isConnected) {
                     ws.send(JSON.stringify(message));
                 }
-               
             });
  
             // In this method we simulate the partition
