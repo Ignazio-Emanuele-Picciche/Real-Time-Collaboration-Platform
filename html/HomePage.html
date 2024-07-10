@@ -64,6 +64,7 @@
 
         ws.onmessage = (event) => {
             if (isValidJSON(event.data)) {
+                console.log('Received JSON message:', event.data)
                 const data = JSON.parse(event.data);
                 if (data.type === 'content') {
                     reconcileChanges(data.content, data.version);
@@ -114,6 +115,8 @@
     }
 
     function reconcileChanges(newContent, newVersion) {
+        console.log('newVersion'+newVersion)
+        console.log('version'+ version)
         if (isNaN(newVersion)) {
             editor.value = newContent;
         } else if (newVersion > version) {
@@ -156,6 +159,8 @@
         };
 
         localChanges.push(message);
+        console.log(localChanges)
+
 
         if (isConnected) {
             ws.send(JSON.stringify(message));
