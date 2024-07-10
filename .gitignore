@@ -3,3 +3,4 @@ venv
 .DS_Store
 .venv
 shared_file.txt
+__pycache__/
