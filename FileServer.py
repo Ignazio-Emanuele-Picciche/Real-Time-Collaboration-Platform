@@ -22,7 +22,7 @@ class CRDT:
         if operation['type'] == 'insert':
             self.document = self.document[:operation['index']] + operation['char'] + self.document[operation['index']:]
         elif operation['type'] == 'delete':
-            self.document = self.document[:operation['index']] + self.document[operaton['index'] +1:]
+            self.document = self.document[:operation['index']] + self.document[operation['index'] +1:]
             self.operations.append(operation)
     
     # Method to apply an operation to the document
@@ -93,12 +93,10 @@ async def file_server(websocket, path):
 
         try:
             username = json.loads(username)
-            
             if isinstance(username, dict):
                 username = str(username['username']) 
             else:
                 username = str(username)
-                
         except json.JSONDecodeError:
             print('Error decoding JSON')
 
@@ -113,7 +111,6 @@ async def file_server(websocket, path):
 
         # Wait for messages from the client
         async for message in websocket:
-            print('!!!!!HELPPP!!!!!')
             data = json.loads(message)
             if data['type'] == 'update':
                 content = data['content']
@@ -157,8 +154,8 @@ def diff(old_text, new_text):
     if len_old > len_new:
         for i in range (min_len, len_old):
             operations.append({'type': 'delete', 'index': min_len})
-    
     elif len_new > len_old:
+        print('\n\nforse ci siamo\n\n')
         for i in range (min_len, len_new):
             operations.append({'type': 'insert', 'index': i, 'char': new_text[i]})
         

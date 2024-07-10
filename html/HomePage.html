@@ -80,7 +80,7 @@
                             // Update user list
                             const users = message.substring(6).split(",");
                             userlist.innerHTML = users.join("<br>");
-                        } else {
+                        } else if(message.split("|").length > 1) {
                             // Process chat message with ID and timestamp
                             const [id, sender, timestamp, content] = message.split("|");
  
