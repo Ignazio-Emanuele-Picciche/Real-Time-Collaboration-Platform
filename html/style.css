@@ -42,6 +42,7 @@ body {
 
 #chatWrapper {
     display: flex;
+    flex-direction: column;
     gap: 20px;
     background-color: #fff;
     padding: 20px;
@@ -92,4 +93,11 @@ button:hover {
 button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
+}
+
+/* Media Queries */
+@media (min-width: 768px) {
+    #chatWrapper {
+        flex-direction: row;
+    }
 }
