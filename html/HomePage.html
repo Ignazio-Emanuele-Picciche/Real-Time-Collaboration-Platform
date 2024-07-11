@@ -32,156 +32,161 @@
             <div id="userlist"></div>
         </div>
     </div>
-</div>
-
-<script>
-    const status = document.getElementById('status');
-    const userlist = document.getElementById('userlist');
-    const editor = document.getElementById('editor');
-    const usernameInput = document.getElementById('username');
-    const setUsernameButton = document.getElementById('setUsername');
-    const toggleTimestamps = document.getElementById('toggleTimestamps');
-    const simulatePartitionButton = document.getElementById('simulatePartition');
-    const reconnectButton = document.getElementById('reconnect');
-
-    var username = '';
-
-    let ws = new WebSocket('ws://localhost:4000');
-    let localChanges = [];
-    let version = 0;
-    let isConnected = true;
-
-    function connectedWebSocket() {
-        ws = new WebSocket('ws://localhost:4000');
-
-        ws.onopen = () => {
-            editor.disabled = false;
-            if (localChanges.length > 0) {
-                console.log('entrato');
-                localChanges.forEach(change => ws.send(JSON.stringify(change)));
+ 
+   
+        <script>
+            const status = document.getElementById('status');
+            const userlist = document.getElementById('userlist');
+            const editor = document.getElementById('editor');
+            const usernameInput = document.getElementById('username');
+            const setUsernameButton = document.getElementById('setUsername');
+            const toggleTimestamps = document.getElementById('toggleTimestamps');
+            const simulatePartitionButton = document.getElementById('simulatePartition');
+            const reconnectButton = document.getElementById('reconnect');
+           
+            var username = '';
+ 
+            let ws = new WebSocket('ws://localhost:4000');
+            let localChanges = [];
+            let version = 0;
+            let isConnected = true;
+ 
+            // In this method we create a connection with the server
+            function connectedWebSocket() {
+                ws = new WebSocket('ws://localhost:4000');
+ 
+                ws.onopen = () => {
+                    editor.disabled = false;
+                    if (localChanges.length > 0) {
+                        newContent = localChanges[localChanges.length - 1];
+                        newContent.type = 'reconnect';
+                        ws.send(JSON.stringify(newContent));
+                        // localChanges.forEach(change => ws.send(JSON.stringify(change)));
+                        localChanges = []; // after sending the changes, we clear the local changes
+                    }
+                };
+ 
+                ws.onmessage = (event) => {
+                    if (isValidJSON(event.data)) {
+                        // Handle JSON messages here
+                        console.log('Received JSON message:', event.data)
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'content') {
+                            editor.value = data.content;
+                        }
+                    } else {    
+                        // Handle non-JSON messages here, if needed
+                        console.log("Received non-JSON message:", event.data);
+ 
+                        const message = event.data;
+ 
+                        if (message.startsWith("USERS:")) {
+                            // Update user list
+                            const users = message.substring(6).split(",");
+                            userlist.innerHTML = users.join("<br>");
+                        } else if(message.split("|").length > 1) {
+                            // Process chat message with ID and timestamp
+                            const [id, sender, timestamp, content] = message.split("|");
+ 
+                            const statusHistory = document.createElement('div');
+                            statusHistory.dataset.id = id;
+ 
+                            const timestampSpan = document.createElement('span');
+                            timestampSpan.className = 'timestamp';
+                            timestampSpan.textContent = `[${timestamp}] `;
+                            timestampSpan.style.display = toggleTimestamps.checked ? 'inline' : 'none';
+ 
+                            const senderSpan = document.createElement('span');
+                            senderSpan.className = 'sender';
+                            senderSpan.textContent = `${sender}: `;
+ 
+                            const contentSpan = document.createElement('span');
+                            contentSpan.className = 'content';
+                            contentSpan.textContent = content;
+ 
+                            statusHistory.appendChild(timestampSpan);
+                            statusHistory.appendChild(senderSpan);
+                            statusHistory.appendChild(contentSpan);
+                            status.appendChild(statusHistory);
+                            status.scrollTop = status.scrollHeight;
+                        }
+                    }
+                };
             }
-        };
-
-        ws.onmessage = (event) => {
-            if (isValidJSON(event.data)) {
-                console.log('Received JSON message:', event.data)
-                const data = JSON.parse(event.data);
-                if (data.type === 'content') {
-                    reconcileChanges(data.content, data.version);
-                }
-            } else {
-                console.log("received non-json message:", event.data);
-                const message = event.data;
-
-                if (message.startsWith("USERS:")) {
-                    const users = message.substring(6).split(",");
-                    userlist.innerHTML = users.join("<br>");
-                } else {
-                    const [id, sender, timestamp, content] = message.split("|");
-
-                    const chatMessage = document.createElement('div');
-                    chatMessage.dataset.id = id;
-
-                    const timestampSpan = document.createElement('span');
-                    timestampSpan.className = 'timestamp';
-                    timestampSpan.textContent = `[${timestamp}] `;
-                    timestampSpan.style.display = toggleTimestamps.checked ? 'inline' : 'none';
-
-                    const senderSpan = document.createElement('span');
-                    senderSpan.className = 'sender';
-                    senderSpan.textContent = `${sender}: `;
-
-                    const contentSpan = document.createElement('span');
-                    contentSpan.className = 'content';
-                    contentSpan.textContent = content;
-
-                    chatMessage.appendChild(timestampSpan);
-                    chatMessage.appendChild(senderSpan);
-                    chatMessage.appendChild(contentSpan);
-                    status.appendChild(chatMessage);
-                    status.scrollTop = status.scrollHeight;
+ 
+ 
+            // In this method we check if the text is a valid JSON
+            // If it is valid we return true, otherwise we return false
+            function isValidJSON(text) {
+                try {
+                    JSON.parse(text);
+                    return true;
+                } catch {
+                    return false;
                 }
             }
-        };
-    }
 
-    function isValidJSON(text) {
-        try {
-            JSON.parse(text);
-            return true;
-        } catch {
-            return false;
-        }
-    }
+ 
+            // In this method we apply the changes to the editor
+            function applyChange(change) {
+                editor.value = change.content;
+            }
+           
+           
+            // In this method we check if taggle Timestamps is checked or not.
+            // If it is checked we show the timestamp, otherwise we hide it.
+            toggleTimestamps.onchange = () => {
+                const timestamps = document.querySelectorAll('.timestamp');
+                timestamps.forEach(timestamp => {
+                    timestamp.style.display = toggleTimestamps.checked ? 'inline' : 'none';
+                });
+            };
+ 
+            // In this method we send the username to the server, if the username is not empty
+            setUsernameButton.onclick = () => {
+                username = usernameInput.value;
+                if (username) {
+                    ws.send(JSON.stringify(username));
+                    usernameInput.disabled = true;
+                    setUsernameButton.disabled = true;
+                    editor.disabled = false;
+                    simulatePartitionButton.disabled = false;
+                }
+            };
+ 
+            // In this method we check if the editor is changed and we send the message to the server
+            editor.addEventListener('input', () => {
+                const message = {
+                    type: 'update',
+                    content: editor.value,
+                    version: ++version,
+                    username: username
+                };
+                
+                localChanges.push(message);
 
-    function reconcileChanges(newContent, newVersion) {
-        console.log('newVersion'+newVersion)
-        console.log('version'+ version)
-        if (isNaN(newVersion)) {
-            editor.value = newContent;
-        } else if (newVersion > version) {
-            editor.value = newContent;
-            version = newVersion;
-            localChanges = [];
-        } else if (newVersion == version) {
-            localChanges.forEach(change => applyChange(change));
-        }
-    }
-
-    function applyChange(change) {
-        editor.value = change.content;
-    }
-
-    toggleTimestamps.onchange = () => {
-        const timestamps = document.querySelectorAll('.timestamp');
-        timestamps.forEach(timestamp => {
-            timestamp.style.display = toggleTimestamps.checked ? 'inline' : 'none';
-        });
-    };
-
-    setUsernameButton.onclick = () => {
-        username = usernameInput.value;
-        if (username) {
-            ws.send(username);
-            usernameInput.disabled = true;
-            setUsernameButton.disabled = true;
-            editor.disabled = false;
-            simulatePartitionButton.disabled = false;
-        }
-    };
-
-    editor.addEventListener('input', () => {
-        const message = {
-            type: 'update',
-            content: editor.value,
-            version: ++version,
-            username: username
-        };
-
-        localChanges.push(message);
-        console.log(localChanges)
-
-
-        if (isConnected) {
-            ws.send(JSON.stringify(message));
-        }
-    });
-
-    simulatePartitionButton.onclick = () => {
-        ws.close();
-        isConnected = false;
-        reconnectButton.disabled = false;
-        simulatePartitionButton.disabled = true;
-    };
-
-    reconnectButton.onclick = () => {
-        connectedWebSocket();
-        isConnected = true;
-        reconnectButton.disabled = true;
-        simulatePartitionButton.disabled = false;
-    };
-
-    connectedWebSocket();
-</script>
+                if(isConnected) {
+                    ws.send(JSON.stringify(message));
+                }
+            });
+ 
+            // In this method we simulate the partition
+            simulatePartitionButton.onclick = () => {
+                ws.close();
+                isConnected = false;
+                reconnectButton.disabled = false;
+                simulatePartitionButton.disabled = true;
+            };
+ 
+            // In this method we reconnect the server
+            reconnectButton.onclick = () => {
+                connectedWebSocket();
+                isConnected = true;
+                reconnectButton.disabled = true;
+                simulatePartitionButton.disabled = false;
+            };
+ 
+            connectedWebSocket();
+    </script>
 </body>
 </html>

@@ -4,60 +4,52 @@ import json
 import os
 from datetime import datetime
 import websockets
-
+from CRDT import CRDT
+import difflib
 
 connected_clients = {} # Dictionary to store the connected clients
-chat_history = [] # List to store the chat history
 FILE_PATH = "shared_file.txt" # Path to the shared file
+crdt = CRDT() # Create an instance of the CRDT class
 
+
+'''
+    This method sends a message to all connected clients
+'''
 async def send_to_all(message):
-    """
-    Broadcasts a message to all connected clients
-    """
     # Loop through all connected clients and send the message
     if connected_clients:
         await asyncio.wait([client.send(message) for client in connected_clients])
 
-
-
-
-# async def send_chat_history(websocket):
-#      """
-#      Sends the entire chat history to the newly connected client
-#      """
-#      for message in chat_history:
-#          await websocket.send(message)
-
+'''
+    This method sends the list of currently connected users to all clients
+'''
 
 async def send_user_list():
-    """
-    Broadcasts the list of currently connected users to all clients
-    """
     # Loop through all connected clients and send the user list
     if connected_clients:
         user_list_message = "USERS: " + "," + ",".join(connected_clients.values())
         await asyncio.wait([client.send(user_list_message) for client in connected_clients])
 
+'''
+    This method loads and saves the contents of the shared file
+'''
 async def load_file():
-    """
-    Loads the contents of the shared file
-    """
     if os.path.exists(FILE_PATH):
         with open (FILE_PATH, 'r') as file:
             return file.read()
     return ""
 
+'''
+    This method saves the contents of the shared file
+'''
 async def save_file(content):
-    """
-    Saves the contents of the shared file
-    """
     with open (FILE_PATH, 'w') as file:
         file.write(content)
 
+'''
+    This method broadcasts a message to all connected clients
+'''
 async def broadcast(message):
-    """
-    Broadcasts a message to all connected clients
-    """
     if connected_clients:
         await asyncio.wait([client.send(json.dumps(message)) for client in connected_clients])
 
@@ -79,28 +71,35 @@ async def file_server(websocket, path):
 
     try:
         await websocket.send("Welcome to the Shared File! Please enter your name:")
-        username = await websocket.recv() # Wait for the client to send their username
+        messageRecv = await websocket.recv() # Wait for the client to send their username
+        type = ''
 
         try:
-            username = json.loads(username)
-            
-            if isinstance(username, dict):
-                username = str(username['username']) 
+            messageRecv = json.loads(messageRecv)
+            if isinstance(messageRecv, dict):
+                username = str(messageRecv['username'])
+                type = str(messageRecv['type']) 
             else:
-                username = str(username)
-                
+                username = str(messageRecv)
         except json.JSONDecodeError:
             print('Error decoding JSON')
 
         connected_clients[websocket] = username
-        # await send_chat_history(websocket) # Send chat history to the new client
         join_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has joined the document."
         await send_to_all(join_message) # Send a message to all connected clients
-        # chat_history.append(join_message) # Add the join_message to the chat history
+        
 
         await send_user_list() # Update user list to all connected clients
         content = await load_file() # Load the contents of the shared file
-        await websocket.send(json.dumps({"type": "content", "content": content})) # Send the contents of the shared file to the client
+
+        if(type != 'reconnect'):
+            await websocket.send(json.dumps({"type": "content", "content": content})) # Send the contents of the shared file to the client
+        else: 
+            content = messageRecv['content']
+            updated_content = network_partition_consistency(crdt.get_document(), content)
+            await save_file(updated_content)
+            await broadcast({"type": "content", "content": updated_content, "version": None})
+
 
         # Wait for messages from the client
         async for message in websocket:
@@ -108,15 +107,11 @@ async def file_server(websocket, path):
             if data['type'] == 'update':
                 content = data['content']
                 version = data['version']
-
-                # print('\n'+str(version)+'\n')
-
-                await save_file(content)
-                await broadcast({"type": "content", "content": content, "version": version})
-
-            # chat_message = f"{uuid.uuid4()}|{username}|{datetime.now().isoformat()}|{message}"
-            # chat_history.append(chat_message)
-            # await send_to_all(chat_message)
+                operations = crdt_operations(crdt.get_document(), content)
+                for op in operations:
+                    crdt.apply_operation(op)
+                await save_file(crdt.get_document())
+                await broadcast({"type": "content", "content": crdt.get_document(), "version": version})
  
     except websockets.ConnectionClosed:
         pass
@@ -126,9 +121,81 @@ async def file_server(websocket, path):
         leave_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has left the document."
         connected_clients.pop(websocket, None)
         await send_to_all(leave_message) # Send a message to all connected clients that the user has left
-        # chat_history.append(leave_message)  
-
         await send_user_list()
+
+'''
+    This method calculates the difference between two strings and returns a new string that is consistent with both strings
+    
+    Args: 
+        onlineText: The online text
+        offlineText: The offline text
+    
+    Returns:
+        A new string that is consistent with both strings
+    '''
+def network_partition_consistency(onlineText, offlineText):
+    # Use SequenceMatcher to find differences
+    # SequenceMatcher is a class from the difflib module that helps to compare sequences of any type
+    matcher = difflib.SequenceMatcher(None, onlineText, offlineText)
+    result = []
+    
+    # Get and iterate through the operations (or "opcodes") that describe how to transform text1 into text2
+    for opcode in matcher.get_opcodes():
+        # Each opcode is a tuple containing: (tag, i1, i2, j1, j2)
+        # tag: type of operation (equal, replace, delete, insert)
+        # i1, i2: start and end index in onlineText
+        # j1, j2: start and end index in offlineText
+        tag, i1, i2, j1, j2 = opcode
+        
+        # If the parts are equal, add them to the result without changes
+        if tag == 'equal':
+            result.append(onlineText[i1:i2])
+        # If there's a replacement, add both the text from onlineText and offlineText
+        elif tag == 'replace':
+            result.append(onlineText[i1:i2])
+            result.append(offlineText[j1:j2])
+        # If there's a deletion, add the text from onlineText
+        elif tag == 'delete':
+            result.append(onlineText[i1:i2])
+        # If there's an insertion, add the text from offlineText
+        elif tag == 'insert':
+            result.append(offlineText[j1:j2])
+        
+    # Join all the pieces of text in the result and return it
+    return ''.join(result)
+
+
+'''
+    This method calculates the difference between two strings and returns a list of operations to transform the old string into the new string
+    
+    Args:
+        old_text: The old string
+        new_text: The new string
+    
+    Returns:
+        operations: A list of operations to transform the old string into the new string
+'''
+def crdt_operations(old_text, new_text):
+    print('\nOld Text:', old_text)
+    print('\nNew Text:', new_text)
+    operations = []
+    len_old, len_new = len(old_text), len(new_text)
+    min_len = min(len_old, len_new)
+
+    for i in range (min_len):
+        if old_text[i] != new_text[i]:
+            operations.append({'type': 'delete', 'index': i})
+            operations.append({'type': 'insert', 'index': i, 'char': new_text[i]})
+        
+    if len_old > len_new:
+        for i in range (min_len, len_old):
+            operations.append({'type': 'delete', 'index': min_len})
+    elif len_new > len_old:
+        for i in range (min_len, len_new):
+            operations.append({'type': 'insert', 'index': i, 'char': new_text[i]})
+        
+    return operations
+
 
 
 # Start the server
