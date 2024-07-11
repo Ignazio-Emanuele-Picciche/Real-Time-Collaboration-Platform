@@ -1,4 +1,4 @@
-/* Base styles */
+/* Set the base styles for the body */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #f0f0f0;
@@ -12,6 +12,7 @@ body {
     min-height: 100vh;
 }
 
+/* Set the styles for the container */
 #container {
     width: 90%;
     max-width: 1200px;
@@ -23,6 +24,7 @@ body {
     flex-direction: column;
 }
 
+/* Set the styles for the header */
 header {
     background-color: hwb(221 13% 2%);
     color: white;
@@ -30,6 +32,7 @@ header {
     text-align: center;
 }
 
+/* Set the styles for the main content */
 main {
     padding: 20px;
     display: flex;
@@ -37,6 +40,7 @@ main {
     gap: 20px;
 }
 
+/* Set the styles for the sections */
 section {
     background-color: #ffffff;
     padding: 20px;
@@ -44,6 +48,7 @@ section {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Set the styles for the user section */
 #user-section {
     display: flex;
     flex-direction: column;
@@ -51,6 +56,7 @@ section {
     gap: 10px;
 }
 
+/* Set the styles for the user input and button */
 #user-section input, #user-section button {
     width: 100%;
     max-width: 300px;
@@ -61,6 +67,7 @@ section {
     font-size: 16px;
 }
 
+/* Set the styles for the user button */
 #user-section button {
     background-color: hwb(221 13% 2%);
     color: white;
@@ -69,26 +76,31 @@ section {
     border: none;
 }
 
+/* Set the styles for the user button on hover */
 #user-section button:hover {
     background-color: hwb(221 13% 2%);
 }
 
+/* Set the styles for the disabled user button */
 #user-section button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
 
+/* Set the styles for the document section */
 #document-section {
     display: flex;
     flex-direction: column;
 }
 
+/* Set the styles for the document title */
 #document-section h2 {
     margin-bottom: 10px;
     font-size: 24px;
     color: rgba(81, 162, 255, 0.991);
 }
 
+/* Set the styles for the editor */
 #editor {
     width: 100%;
     border: 1px solid #ced4da;
@@ -99,12 +111,14 @@ section {
     resize: vertical;
 }
 
+/* Set the styles for the status section */
 #status-section {
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
 }
 
+/* Set the styles for the status wrapper and userlist wrapper */
 #status-wrapper, #userlist-wrapper {
     flex: 1;
     background-color: #f8f9fa;
@@ -115,6 +129,7 @@ section {
     overflow-y: auto;
 }
 
+/* Set the styles for the footer */
 footer {
     background-color: hwb(221 13% 2%);
     color: white;
@@ -122,6 +137,7 @@ footer {
     text-align: center;
 }
 
+/* Set the styles for the footer label */
 footer label {
     display: flex;
     align-items: center;
@@ -130,6 +146,7 @@ footer label {
 
 /* Media Queries */
 @media (min-width: 768px) {
+    /* Adjust the layout for larger screens */
     main {
         flex-direction: row;
         gap: 20px;
@@ -152,6 +169,7 @@ footer label {
 
 /* Responsiveness */
 @media (max-width: 767px) {
+    /* Adjust the layout for smaller screens */
     #status-section {
         flex-direction: column;
     }
