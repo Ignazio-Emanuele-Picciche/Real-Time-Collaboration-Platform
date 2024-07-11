@@ -146,7 +146,7 @@
             setUsernameButton.onclick = () => {
                 username = usernameInput.value;
                 if (username) {
-                    ws.send(username);
+                    ws.send(JSON.stringify(username));
                     usernameInput.disabled = true;
                     setUsernameButton.disabled = true;
                     editor.disabled = false;
