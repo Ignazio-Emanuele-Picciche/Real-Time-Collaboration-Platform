@@ -11,43 +11,45 @@ connected_clients = {} # Dictionary to store the connected clients
 FILE_PATH = "shared_file.txt" # Path to the shared file
 crdt = CRDT() # Create an instance of the CRDT class
 
+
+'''
+    This method sends a message to all connected clients
+'''
 async def send_to_all(message):
-    """
-    Broadcasts a message to all connected clients
-    """
     # Loop through all connected clients and send the message
     if connected_clients:
         await asyncio.wait([client.send(message) for client in connected_clients])
 
+'''
+    This method sends the list of currently connected users to all clients
+'''
+
 async def send_user_list():
-    """
-    Broadcasts the list of currently connected users to all clients
-    """
     # Loop through all connected clients and send the user list
     if connected_clients:
         user_list_message = "USERS: " + "," + ",".join(connected_clients.values())
         await asyncio.wait([client.send(user_list_message) for client in connected_clients])
 
+'''
+    This method loads and saves the contents of the shared file
+'''
 async def load_file():
-    """
-    Loads the contents of the shared file
-    """
     if os.path.exists(FILE_PATH):
         with open (FILE_PATH, 'r') as file:
             return file.read()
     return ""
 
+'''
+    This method saves the contents of the shared file
+'''
 async def save_file(content):
-    """
-    Saves the contents of the shared file
-    """
     with open (FILE_PATH, 'w') as file:
         file.write(content)
 
+'''
+    This method broadcasts a message to all connected clients
+'''
 async def broadcast(message):
-    """
-    Broadcasts a message to all connected clients
-    """
     if connected_clients:
         await asyncio.wait([client.send(json.dumps(message)) for client in connected_clients])
 
@@ -121,7 +123,16 @@ async def file_server(websocket, path):
         await send_to_all(leave_message) # Send a message to all connected clients that the user has left
         await send_user_list()
 
-
+'''
+    This method calculates the difference between two strings and returns a new string that is consistent with both strings
+    
+    Args: 
+        onlineText: The online text
+        offlineText: The offline text
+    
+    Returns:
+        A new string that is consistent with both strings
+    '''
 def network_partition_consistency(onlineText, offlineText):
     # Use SequenceMatcher to find differences
     # SequenceMatcher is a class from the difflib module that helps to compare sequences of any type
