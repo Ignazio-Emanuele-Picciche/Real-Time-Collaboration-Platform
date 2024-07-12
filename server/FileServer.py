@@ -199,7 +199,7 @@ def crdt_operations(old_text, new_text):
 
 
 # Start the server
-start_server = websockets.serve(file_server, 'localhost',4000) 
+start_server = websockets.serve(file_server, 'localhost',6000) 
 
 # Get the default event loop for the current context
 asyncio.get_event_loop().run_until_complete(start_server)  # Start the server and run until the start_server coroutine is complete

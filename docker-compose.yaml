@@ -9,11 +9,11 @@ services: # services that will be run
     networks:
       - sharedDockNet
   
-  be:
+  server:
     build: # build the image from the current directory
-      context: ./BE
+      context: ./server
     ports:
-      - "1234:5000"
+      - "1234:6000"
     networks:
       - sharedDockNet
 

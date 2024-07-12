@@ -13,4 +13,4 @@ RUN pip install -r requirements.txt
 # Run app.py when the container launches
 ENTRYPOINT ["python", "FileServer.py"]
 
-# EXPOSE 5000
+
