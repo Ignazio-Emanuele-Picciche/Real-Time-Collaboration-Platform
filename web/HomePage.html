@@ -49,15 +49,15 @@
             const reconnectButton = document.getElementById('reconnect');
            
             var username = '';
- 
-            let ws = new WebSocket('ws://localhost:1234');
+
+            let ws = new WebSocket('ws://localhost:1234/');
             let localChanges = [];
             let version = 0;
             let isConnected = true;
  
             // In this method we create a connection with the server
             function connectedWebSocket() {
-                ws = new WebSocket('ws://localhost:1234');
+                ws = new WebSocket('ws://localhost:1234/');
  
                 ws.onopen = () => {
                     editor.disabled = false;

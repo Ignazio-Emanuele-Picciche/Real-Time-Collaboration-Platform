@@ -17,5 +17,7 @@ services: # services that will be run
     networks:
       - sharedDockNet
 
-networks: # network name
+networks: # network named
   sharedDockNet: 
+
+
