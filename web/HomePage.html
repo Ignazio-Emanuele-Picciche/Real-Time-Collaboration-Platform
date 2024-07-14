@@ -2,38 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Work Document in Real Time</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Work Document</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="chatContainer">
-    <h2>Work Document in Real-Time</h2>
-    <div id="usernameInputContainer">
-        <input id="username" type="text" placeholder="Enter your username" style="width: 100%;" />
-        <button id="setUsername" style="margin: 1%;">Set Username</button>
-        <button id="simulatePartition" style="margin: 1%;" disabled>Simulate Partition</button>
-        <button id="reconnect" style="margin: 1%;" disabled>Reconnect</button>
+    <div id="container">
+        <header>
+            <h1>Real-Time Work Document</h1>
+        </header>
+        <main>
+            <section id="user-section">
+                <input id="username" type="text" placeholder="Enter your username" />
+                <button id="setUsername">Set Username</button>
+                <button id="simulatePartition" disabled>Simulate Partition</button>
+                <button id="reconnect" disabled>Reconnect</button>
+                <div>
+                    <input type="checkbox" id="toggleTimestamps" checked> Show Timestamps
+                </div>
+            </section>
+            <section id="document-section">
+                <h2>Shared Document</h2>
+                <textarea id="editor" rows="20" placeholder="Content Document..."></textarea>
+            </section>
+            <section id="status-section">
+                <h2 style="color: #51a2fffd;">Status</h2>
+                <div id="status-wrapper">
+                    <div id="status"></div>
+                </div>
+                <h2 style="color: #51a2fffd;">Online Users</h2>
+                <div id="userlist-wrapper">
+                    <div id="userlist"></div>
+                </div>
+            </section>
+        </main>
     </div>
-    <div id="toggleContainer">
-        <input type="checkbox" id="toggleTimestamps" checked>
-        <label for="toggleTimestamps">Show Timestamps</label>
-    </div>
-    <div id="messageInputContainer">
-        <h4>Shared Document</h4>
-        <textarea id="editor" rows="20" placeholder="Content Document..."></textarea>
-    </div>
-    <div id="chatWrapper">
-        <div id="statusWrapper">
-            <h3>Status</h3>
-            <div id="status"></div>
-        </div>
-        <div id="userlistWrapper">
-            <h3>Online Users</h3>
-            <div id="userlist"></div>
-        </div>
-    </div>
- 
-   
+    
         <script>
             const status = document.getElementById('status');
             const userlist = document.getElementById('userlist');
@@ -146,7 +150,7 @@
             setUsernameButton.onclick = () => {
                 username = usernameInput.value;
                 if (username) {
-                    ws.send(username);
+                    ws.send(JSON.stringify(username));
                     usernameInput.disabled = true;
                     setUsernameButton.disabled = true;
                     editor.disabled = false;
