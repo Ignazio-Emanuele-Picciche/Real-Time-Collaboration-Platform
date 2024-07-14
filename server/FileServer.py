@@ -10,7 +10,7 @@ import difflib
 connected_clients = {} # Dictionary to store the connected clients
 FILE_PATH = "shared_file.txt" # Path to the shared file
 crdt = CRDT() # Create an instance of the CRDT class
-
+start_server = ""
 
 '''
     This method sends a message to all connected clients
@@ -196,10 +196,16 @@ def crdt_operations(old_text, new_text):
         
     return operations
 
-
-
-# Start the server
-start_server = websockets.serve(file_server, 'localhost',7777) 
+async def main():
+    try:
+        start_server = await websockets.serve(file_server, '0.0.0.0', 6000)
+        print("WebSocket server started on ws://0.0.0.0:6000")
+        await start_server.wait_closed()
+    except Exception as e:
+        print(f"Error starting server: {e}")
+ 
+if __name__ == "__main__":
+    asyncio.run(main())
 
 # Get the default event loop for the current context
 asyncio.get_event_loop().run_until_complete(start_server)  # Start the server and run until the start_server coroutine is complete
