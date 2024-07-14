@@ -5,7 +5,7 @@ services: # services that will be run
     build:
       context: ./web 
     ports:
-       - "8080:80"
+       - "8583:80"
     networks:
       - sharedDockNet
   
