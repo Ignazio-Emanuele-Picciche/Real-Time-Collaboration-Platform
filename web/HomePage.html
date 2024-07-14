@@ -50,14 +50,14 @@
            
             var username = '';
  
-            let ws = new WebSocket('ws://localhost:4000');
+            let ws = new WebSocket('ws://localhost:7777');
             let localChanges = [];
             let version = 0;
             let isConnected = true;
  
             // In this method we create a connection with the server
             function connectedWebSocket() {
-                ws = new WebSocket('ws://localhost:4000');
+                ws = new WebSocket('ws://localhost:7777');
  
                 ws.onopen = () => {
                     editor.disabled = false;
