@@ -5,7 +5,7 @@ services: # services that will be run
     build:
       context: ./web 
     ports:
-       - "4350:80"
+       - "8080:80"
     networks:
       - sharedDockNet
   
@@ -13,7 +13,7 @@ services: # services that will be run
     build: # build the image from the current directory
       context: ./server
     ports:
-      - "1234:6000"
+      - "5555:6000"
     networks:
       - sharedDockNet
 
