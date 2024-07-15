@@ -176,8 +176,8 @@ def network_partition_consistency(onlineText, offlineText):
         operations: A list of operations to transform the old string into the new string
 '''
 def crdt_operations(old_text, new_text):
-    print('\nOld Text:', old_text)
-    print('\nNew Text:', new_text)
+    # print('\nOld Text:', old_text)
+    # print('\nNew Text:', new_text)
     operations = []
     len_old, len_new = len(old_text), len(new_text)
     min_len = min(len_old, len_new)
