@@ -23,7 +23,7 @@
             </section>
             <section id="document-section">
                 <h2>Shared Document</h2>
-                <textarea id="editor" rows="20" placeholder="Content Document..."></textarea>
+                <textarea id="editor" rows="20" placeholder="Content Document..." disabled></textarea>
             </section>
             <section id="status-section">
                 <h2 style="color: #51a2fffd;">Status</h2>
@@ -60,8 +60,8 @@
                 ws = new WebSocket('ws://localhost:4000');
  
                 ws.onopen = () => {
-                    editor.disabled = false;
                     if (localChanges.length > 0) {
+                        editor.disabled = false;
                         newContent = localChanges[localChanges.length - 1];
                         newContent.type = 'reconnect';
                         ws.send(JSON.stringify(newContent));
