@@ -1,0 +1,23 @@
+version: '3.8' # version of docker-compose
+
+services: # services that will be run
+  web: 
+    build:
+      context: ./web 
+    ports:
+       - "8583:80"
+    networks:
+      - sharedDockNet
+  
+  server:
+    build: # build the image from the current directory
+      context: ./server
+    ports:
+      - "5555:6000"
+    networks:
+      - sharedDockNet
+
+networks: # network named
+  sharedDockNet: 
+
+
