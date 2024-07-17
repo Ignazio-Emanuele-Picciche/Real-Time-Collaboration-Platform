@@ -76,16 +76,18 @@
                         console.log('Received JSON message:', event.data)
                         const data = JSON.parse(event.data);
                         if (data.type === 'content') {
+
+                            console.log(editor.value.substring(cursorPosition-1, cursorPosition));
+                            console.log(data.content.substring(cursorPosition-1, cursorPosition));
+                            
                             if(editor.value.substring(cursorPosition, cursorPosition) !==  data.content.substring(cursorPosition, cursorPosition)) {
                                 cursorPosition++;
                             }
-                            
-                            setCursorPosition(cursorPosition);
 
                             editor.value = data.content;
 
-                            // console.log(editor.value.substring(cursorPosition, cursorPosition+1));
-                            // console.log(data.content.substring(cursorPosition, cursorPosition+1));
+                            console.log(cursorPosition);
+                            setCursorPosition(cursorPosition);
                         } 
                         // else if (data.type === 'cursor') {
                         //     // Update the cursor position for other users
