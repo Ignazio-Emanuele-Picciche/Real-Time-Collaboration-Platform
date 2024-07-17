@@ -83,14 +83,14 @@
                             console.log(editor.value.substring(0, cursorPosition).length);
                             console.log(data.content.substring(0, cursorPosition).length)
                             
-                            if(editor.value.substring(0, cursorPosition).length < data.content.substring(0, cursorPosition).length) {
-                                cursorPosition++;
+                            if(editor.value.substring(0, cursorPosition) != data.content.substring(0, cursorPosition)) {
+                                
+                                if(editor.value.length > data.content.length) {
+                                    cursorPosition--;
+                                } else if(editor.value.length < data.content.length) {
+                                    cursorPosition++;
+                                }
 
-                                console.log('entrato 1');
-                            } else if (editor.value.substring(0, cursorPosition).length > data.content.substring(0, cursorPosition).length) {
-                                cursorPosition--;
-
-                                console.log('entrato 2');
                             }
 
                             editor.value = data.content;
