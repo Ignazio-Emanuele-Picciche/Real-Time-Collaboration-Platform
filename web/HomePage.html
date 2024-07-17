@@ -79,9 +79,14 @@
 
                             console.log(editor.value.substring(cursorPosition-1, cursorPosition));
                             console.log(data.content.substring(cursorPosition-1, cursorPosition));
+
+                            condiction = editor.value.substring(cursorPosition, cursorPosition) !==  data.content.substring(cursorPosition, cursorPosition);
+                            console.log(condiction);
                             
                             if(editor.value.substring(cursorPosition, cursorPosition) !==  data.content.substring(cursorPosition, cursorPosition)) {
                                 cursorPosition++;
+
+                                console.log('entrato');
                             }
 
                             editor.value = data.content;
