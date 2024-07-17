@@ -77,17 +77,17 @@
                         const data = JSON.parse(event.data);
                         if (data.type === 'content') {
 
-                            console.log(editor.value.substring(cursorPosition-1, cursorPosition));
-                            console.log(data.content.substring(cursorPosition-1, cursorPosition));
+                            // console.log(editor.value.substring(cursorPosition-1, cursorPosition));
+                            // console.log(data.content.substring(cursorPosition-1, cursorPosition));
 
-                            condiction = editor.value.substring(cursorPosition, cursorPosition) !==  data.content.substring(cursorPosition, cursorPosition);
-                            console.log(condiction);
+                            console.log(editor.value.substring(0, cursorPosition).length);
+                            console.log(data.content.substring(0, cursorPosition).length)
                             
                             if(editor.value.substring(0, cursorPosition).length < data.content.substring(0, cursorPosition).length) {
                                 cursorPosition++;
 
                                 console.log('entrato 1');
-                            } else (editor.value.substring(0, cursorPosition).length > data.content.substring(0, cursorPosition).length) {
+                            } else if (editor.value.substring(0, cursorPosition).length > data.content.substring(0, cursorPosition).length) {
                                 cursorPosition--;
 
                                 console.log('entrato 2');
