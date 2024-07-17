@@ -170,6 +170,9 @@
                 
                 localChanges.push(message);
 
+                cursorPosition = editor.selectionStart;
+                console.log('Sending cursor position:', username, cursorPosition);
+
                 if(isConnected) {
                     ws.send(JSON.stringify(message));
                 }
@@ -178,6 +181,7 @@
 
             editor.addEventListener('mouseup', sendCursorPosition); // send the cursor position when the user clicks (mouseup event)
             editor.addEventListener('keyup', sendCursorPosition); // send the cursor position when the user types (keyup event)
+            editor.addEventListener('delete', sendCursorPosition); // send the cursor position when the user deletes (delete event)
 
 
             function sendCursorPosition() {
