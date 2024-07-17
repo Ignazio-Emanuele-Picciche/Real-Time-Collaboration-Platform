@@ -77,20 +77,20 @@
                         const data = JSON.parse(event.data);
                         if (data.type === 'content') {
 
-                            // console.log(editor.value.substring(cursorPosition-1, cursorPosition));
-                            // console.log(data.content.substring(cursorPosition-1, cursorPosition));
-
-                            console.log(editor.value.substring(0, cursorPosition).length);
-                            console.log(data.content.substring(0, cursorPosition).length)
+                            // console.log(editor.value.substring(0, cursorPosition).length);
+                            // console.log(data.content.substring(0, cursorPosition).length);
                             
+                            // check if the text is different from the current text in the editor
                             if(editor.value.substring(0, cursorPosition) != data.content.substring(0, cursorPosition)) {
                                 
+                                // if the text is different, we need to find the position of the cursor in the new text
+                                // if the text increeases, the cursor position increases by 1
+                                // if the text decreases, the cursor position decreases by 1
                                 if(editor.value.length > data.content.length) {
                                     cursorPosition--;
                                 } else if(editor.value.length < data.content.length) {
                                     cursorPosition++;
                                 }
-
                             }
 
                             editor.value = data.content;
@@ -98,14 +98,6 @@
                             console.log(cursorPosition);
                             setCursorPosition(cursorPosition);
                         } 
-                        // else if (data.type === 'cursor') {
-                        //     // Update the cursor position for other users
-                        //     const cursorPosition = data.cursorPosition;
-                        //     if (data.username === username) {
-                        //         console.log(username, cursorPosition);
-                        //         setCursorPosition(cursorPosition);
-                        //     }
-                        // }
                     } else {    
                         // Handle non-JSON messages here, if needed
                         console.log("Received non-JSON message:", event.data);
@@ -189,8 +181,9 @@
                 
                 localChanges.push(message);
 
+                // from input event, we get the cursor position
                 cursorPosition = editor.selectionStart;
-                console.log('Sending cursor position:', username, cursorPosition);
+                console.log('Saving cursor position:', username, cursorPosition);
 
                 if(isConnected) {
                     ws.send(JSON.stringify(message));
@@ -200,26 +193,16 @@
 
             editor.addEventListener('mouseup', sendCursorPosition); // send the cursor position when the user clicks (mouseup event)
             editor.addEventListener('keyup', sendCursorPosition); // send the cursor position when the user types (keyup event)
-            editor.addEventListener('delete', sendCursorPosition); // send the cursor position when the user deletes (delete event)
 
-
+            // In this method we send the cursor position to the setCursorPosition method
             function sendCursorPosition() {
-                // const message = {
-                //     type: 'cursor',
-                //     cursorPosition: editor.selectionStart, // get the current cursor position
-                //     username: username
-                // };
-                
                 cursorPosition = editor.selectionStart;
                 console.log('Sending cursor position:', username, cursorPosition);
                 
                 setCursorPosition(cursorPosition);
-                
-                // if (isConnected) {
-                //     ws.send(JSON.stringify(message));
-                // }
             }
 
+            // In this method we set the cursor position
             function setCursorPosition(position) {
                 console.log('Setting cursor position:', username);
 
@@ -227,8 +210,6 @@
                 // is used to ensure that the cursor is placed inside the textarea element, allowing the user to continue typing or see the cursor position immediately after it has been set or updated.
                 editor.setSelectionRange(position, position);
             }
-
-
 
  
             // In this method we simulate the partition

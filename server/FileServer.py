@@ -113,11 +113,7 @@ async def file_server(websocket, path):
 
                 await save_file(crdt.get_document())
                 await broadcast({"type": "content", "content": crdt.get_document()})
-            
-            # elif data['type'] == 'cursor':
-            #     cursor_position = data['cursorPosition']
-            #     await broadcast({'type': 'cursor', 'username': data['username'], 'cursorPosition': cursor_position})
- 
+                
     except websockets.ConnectionClosed:
         print("Connection closed")
 
@@ -127,6 +123,7 @@ async def file_server(websocket, path):
         connected_clients.pop(websocket, None)
         await send_to_all(leave_message) # Send a message to all connected clients that the user has left
         await send_user_list()
+
 
 '''
     This method calculates the difference between two strings and returns a new string that is consistent with both strings
