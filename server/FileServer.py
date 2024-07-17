@@ -98,7 +98,7 @@ async def file_server(websocket, path):
             content = messageRecv['content']
             updated_content = network_partition_consistency(crdt.get_document(), content)
             await save_file(updated_content)
-            await broadcast({"type": "content", "content": updated_content, "version": None})
+            await broadcast({"type": "content", "content": updated_content})
 
 
         # Wait for messages from the client
@@ -106,12 +106,11 @@ async def file_server(websocket, path):
             data = json.loads(message)
             if data['type'] == 'update':
                 content = data['content']
-                version = data['version']
                 operations = crdt_operations(crdt.get_document(), content)
                 for op in operations:
                     crdt.apply_operation(op)
                 await save_file(crdt.get_document())
-                await broadcast({"type": "content", "content": crdt.get_document(), "version": version})
+                await broadcast({"type": "content", "content": crdt.get_document()})
  
     except websockets.ConnectionClosed:
         pass
