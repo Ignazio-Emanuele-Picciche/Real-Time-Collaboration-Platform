@@ -114,9 +114,9 @@ async def file_server(websocket, path):
                 await save_file(crdt.get_document())
                 await broadcast({"type": "content", "content": crdt.get_document()})
             
-            elif data['type'] == 'cursor':
-                cursor_position = data['cursorPosition']
-                await broadcast({'type': 'cursor', 'username': data['username'], 'cursorPosition': cursor_position})
+            # elif data['type'] == 'cursor':
+            #     cursor_position = data['cursorPosition']
+            #     await broadcast({'type': 'cursor', 'username': data['username'], 'cursorPosition': cursor_position})
  
     except websockets.ConnectionClosed:
         print("Connection closed")

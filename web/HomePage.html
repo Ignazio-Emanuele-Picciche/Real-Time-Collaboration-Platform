@@ -53,6 +53,7 @@
             let localChanges = [];
             let isConnected = true;
             const hostname = window.location.hostname;
+            let cursorPosition;
  
             // In this method we create a connection with the server
             function connectedWebSocket() {
@@ -76,15 +77,16 @@
                         const data = JSON.parse(event.data);
                         if (data.type === 'content') {
                             editor.value = data.content;
-                            // setCursorPosition(data.cursorPosition);
-                        } else if (data.type === 'cursor') {
-                            // Update the cursor position for other users
-                            const cursorPosition = data.cursorPosition;
-                            if (data.username === username) {
-                                console.log(username, cursorPosition);
-                                setCursorPosition(cursorPosition);
-                            }
-                        }
+                            setCursorPosition(cursorPosition);
+                        } 
+                        // else if (data.type === 'cursor') {
+                        //     // Update the cursor position for other users
+                        //     const cursorPosition = data.cursorPosition;
+                        //     if (data.username === username) {
+                        //         console.log(username, cursorPosition);
+                        //         setCursorPosition(cursorPosition);
+                        //     }
+                        // }
                     } else {    
                         // Handle non-JSON messages here, if needed
                         console.log("Received non-JSON message:", event.data);
@@ -179,18 +181,25 @@
 
 
             function sendCursorPosition() {
-                const message = {
-                    type: 'cursor',
-                    cursorPosition: editor.selectionStart, // get the current cursor position
-                    username: username
-                };
-
-                if (isConnected) {
-                    ws.send(JSON.stringify(message));
-                }
+                // const message = {
+                //     type: 'cursor',
+                //     cursorPosition: editor.selectionStart, // get the current cursor position
+                //     username: username
+                // };
+                
+                cursorPosition = editor.selectionStart;
+                console.log('Sending cursor position:', username, cursorPosition);
+                
+                setCursorPosition(cursorPosition);
+                
+                // if (isConnected) {
+                //     ws.send(JSON.stringify(message));
+                // }
             }
 
             function setCursorPosition(position) {
+                console.log('Setting cursor position:', username);
+
                 editor.focus(); // is a method in JavaScript that sets the focus on the specified element, which in this case is the textarea element with the ID editor. When the focus is set on an element, it becomes the active element on the page, meaning that it will receive any keyboard input from the user.
                 // is used to ensure that the cursor is placed inside the textarea element, allowing the user to continue typing or see the cursor position immediately after it has been set or updated.
                 editor.setSelectionRange(position, position);
