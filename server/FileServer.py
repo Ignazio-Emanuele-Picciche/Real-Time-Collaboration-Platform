@@ -203,7 +203,7 @@ def crdt_operations(old_text, new_text):
 
 async def main():
     try:
-        start_server = await websockets.serve(file_server, '0.0.0.0', 7777)
+        start_server = await websockets.serve(file_server, '0.0.0.0', 6000)
         print("WebSocket server started on ws://0.0.0.0:6000")
         await start_server.wait_closed()
     except Exception as e:
