@@ -56,7 +56,7 @@
  
             // In this method we create a connection with the server
             function connectedWebSocket() {
-                ws = new WebSocket('ws://' + hostname + ':5555/');
+                ws = new WebSocket('ws://' + hostname + ':8583/');
  
                 ws.onopen = () => {
                     if (localChanges.length > 0) {
@@ -80,7 +80,8 @@
                         } else if (data.type === 'cursor') {
                             // Update the cursor position for other users
                             const cursorPosition = data.cursorPosition;
-                            if (data.username !== username) {
+                            if (data.username === username) {
+                                console.log(username, cursorPosition);
                                 setCursorPosition(cursorPosition);
                             }
                         }
