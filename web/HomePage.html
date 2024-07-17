@@ -48,17 +48,15 @@
             const simulatePartitionButton = document.getElementById('simulatePartition');
             const reconnectButton = document.getElementById('reconnect');
            
-            var username = '';
-
-            hostname = window.location.hostname;
-            let ws = new WebSocket('ws://'+hostname+':5555/');
+            let username = '';
+            let ws;
             let localChanges = [];
-            let version = 0;
             let isConnected = true;
+            const hostname = window.location.hostname;
  
             // In this method we create a connection with the server
             function connectedWebSocket() {
-                ws = new WebSocket('ws://'+hostname+':5555/');
+                ws = new WebSocket('ws://' + hostname + ':5555/');
  
                 ws.onopen = () => {
                     if (localChanges.length > 0) {
@@ -130,13 +128,6 @@
                     return false;
                 }
             }
-
- 
-            // In this method we apply the changes to the editor
-            function applyChange(change) {
-                editor.value = change.content;
-            }
-           
            
             // In this method we check if taggle Timestamps is checked or not.
             // If it is checked we show the timestamp, otherwise we hide it.
@@ -164,7 +155,6 @@
                 const message = {
                     type: 'update',
                     content: editor.value,
-                    version: ++version,
                     username: username
                 };
                 
