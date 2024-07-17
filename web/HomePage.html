@@ -83,10 +83,14 @@
                             condiction = editor.value.substring(cursorPosition, cursorPosition) !==  data.content.substring(cursorPosition, cursorPosition);
                             console.log(condiction);
                             
-                            if(editor.value.substring(cursorPosition, cursorPosition) !==  data.content.substring(cursorPosition, cursorPosition)) {
+                            if(editor.value.substring(0, cursorPosition).length < data.content.substring(0, cursorPosition).length) {
                                 cursorPosition++;
 
-                                console.log('entrato');
+                                console.log('entrato 1');
+                            } else (editor.value.substring(0, cursorPosition).length > data.content.substring(0, cursorPosition).length) {
+                                cursorPosition--;
+
+                                console.log('entrato 2');
                             }
 
                             editor.value = data.content;
