@@ -5,9 +5,8 @@
     - [Project Objective](#project-objectives)
     - [Challenges](#challenges) -->
 
-> [!INFO] You can find the complete documentation here:
-    [english version](Real_Time_Collaboration_Platform.pdf)
-    or [italian version](Real_Time_Collaboration_Platform.pdf)
+> [!NOTE] <br>
+> You can find the complete documentation here: [english version](Real_Time_Collaboration_Platform.pdf) or [italian version](Real_Time_Collaboration_Platform.pdf)
 
 
 ### General description of the project
