@@ -1,4 +1,4 @@
-# **_REAL TIME COLLABORATION PLATFORM - Architectures of Distributed Systems (23/24)_**
+# **_Real-Time Collaboration Platform - Architectures of Distributed Systems (23/24)_**
 
 <!-- ## Index
 1. [Project Description](#general-description-of-the-project)
