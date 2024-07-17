@@ -23,7 +23,6 @@ async def send_to_all(message):
 '''
     This method sends the list of currently connected users to all clients
 '''
-
 async def send_user_list():
     # Loop through all connected clients and send the user list
     if connected_clients:
@@ -92,7 +91,7 @@ async def file_server(websocket, path):
         await send_user_list() # Update user list to all connected clients
         content = await load_file() # Load the contents of the shared file
 
-        if(type != 'reconnect'):
+        if type != 'reconnect':
             await websocket.send(json.dumps({"type": "content", "content": content})) # Send the contents of the shared file to the client
         else: 
             content = messageRecv['content']
@@ -104,16 +103,23 @@ async def file_server(websocket, path):
         # Wait for messages from the client
         async for message in websocket:
             data = json.loads(message)
+
             if data['type'] == 'update':
                 content = data['content']
                 operations = crdt_operations(crdt.get_document(), content)
+
                 for op in operations:
                     crdt.apply_operation(op)
+
                 await save_file(crdt.get_document())
                 await broadcast({"type": "content", "content": crdt.get_document()})
+            
+            elif data['type'] == 'cursor':
+                cursor_position = data['cursorPosition']
+                await broadcast({'type': 'cursor', 'username': data['username'], 'cursorPosition': cursor_position})
  
     except websockets.ConnectionClosed:
-        pass
+        print("Connection closed")
 
     finally:
         # Remove the client from the connected_clients dictionary
