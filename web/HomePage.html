@@ -56,7 +56,7 @@
  
             // In this method we create a connection with the server
             function connectedWebSocket() {
-                ws = new WebSocket('ws://' + hostname + ':8583/');
+                ws = new WebSocket('ws://' + hostname + ':5555/');
  
                 ws.onopen = () => {
                     if (localChanges.length > 0) {
