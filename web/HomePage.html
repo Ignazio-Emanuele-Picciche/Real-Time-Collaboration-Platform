@@ -72,14 +72,14 @@
                 ws.onmessage = (event) => {
                     if (isValidJSON(event.data)) {
                         // Handle JSON messages here
-                        console.log('Received JSON message:', event.data)
+                        //console.log('Received JSON message:', event.data)
                         const data = JSON.parse(event.data);
                         if (data.type === 'content') {
                             editor.value = data.content;
                         }
                     } else {    
                         // Handle non-JSON messages here, if needed
-                        console.log("Received non-JSON message:", event.data);
+                        //console.log("Received non-JSON message:", event.data);
  
                         const message = event.data;
  
@@ -177,10 +177,10 @@
  
             // In this method we reconnect the server
             reconnectButton.onclick = () => {
-                connectedWebSocket();
                 isConnected = true;
                 reconnectButton.disabled = true;
                 simulatePartitionButton.disabled = false;
+                connectedWebSocket();
             };
  
             connectedWebSocket();
