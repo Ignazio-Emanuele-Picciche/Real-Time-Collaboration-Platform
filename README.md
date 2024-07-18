@@ -6,7 +6,7 @@
     - [Challenges](#challenges) -->
 
 > [!NOTE] <br>
-> You can find the complete documentation here: [english version](Real_Time_Collaboration_Platform.pdf) or [italian version](Real_Time_Collaboration_Platform.pdf)
+> You can find the complete documentation here: [english version](Real_Time_Collaboration_Platform_ITA.pdf) or [italian version](Real_Time_Collaboration_Platform_ITA.pdf)
 
 
 ### General description of the project
