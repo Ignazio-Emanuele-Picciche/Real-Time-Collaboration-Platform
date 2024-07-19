@@ -15,7 +15,7 @@ start_server = ""
 
 ### MESSAGE MANAGEMENT FUNCTIONS ###
 '''
-    This method sends a message to all connected clients
+    This method sends a message to all connected clients, such as when a user joins or leaves the document
 
     Args:
         message: The message to send to all clients
@@ -30,10 +30,11 @@ async def send_to_all(message):
 
 
 '''
-    This method broadcasts a message to all connected clients
+    This message broadcasts a message to all connected clients, specifically designed to send file content updates to all clients. 
+    This method uses JSON to serialize the messages, facilitating the transmission of structured data.
 
     Args:
-        message: The message to broadcast
+        message: The document update message to broadcast
     
     Returns:
         None
@@ -63,7 +64,7 @@ async def send_user_list():
 
 ### DOCUMENT MANAGEMENT FUNCTIONS ###
 '''
-    This method loads and saves the contents of the shared file
+    This method loads the contents of the shared file
 
     Args:
         None
@@ -79,7 +80,7 @@ async def load_file():
 
 
 '''
-    This method saves the contents of the shared file
+    Tjhis method saves the content in the shared file, updating the file with the new content
 
     Args:
         content: The content to save in the file
@@ -93,7 +94,8 @@ async def save_file(content):
 
 
 '''
-    This method calculates the difference between two strings and returns a new string that is consistent with both strings
+    This method calculates the difference between two strings and returns a new string that is consistent with both strings.
+    This method uses the SequenceMatcher class from the difflib module to find differences and conflicts between the two strings.
     
     Args: 
         onlineText: The online text
@@ -137,14 +139,16 @@ def network_partition_consistency(onlineText, offlineText):
 
 ### FILE SERVER LOGIC ###
 '''
-    In this method, we manage the principal logic of the file server:
+    In this method, are managed the principal operations of the file server:
     - It handles the connection and communication with clients
     - It maintains a list of connected clients and chat history
     - It menage disconnection of clients
+    - It menage the CRDT operations
+    - It menage the consistency of the document
 
     Args:
-        websocket: The WebSocket connection object for a client
-        path: The URL path requested by the client
+        websocket: The WebSocket connection object
+        path: The path of the WebSocket connection
 
     Returns:
         None
@@ -225,15 +229,17 @@ def crdt_operations(old_text, new_text):
     len_old, len_new = len(old_text), len(new_text)
     min_len = min(len_old, len_new)
 
+    # Iterate through the strings and find the differences till the minimum length,
+    # adding the operations to the list, such as delete and insert
     for i in range (min_len):
         if old_text[i] != new_text[i]:
             operations.append({'type': 'delete', 'index': i})
             operations.append({'type': 'insert', 'index': i, 'char': new_text[i]})
-        
-    if len_old > len_new:
+    
+    if len_old > len_new: # If the old string is longer than the new string, delete the remaining characters
         for i in range (min_len, len_old):
             operations.append({'type': 'delete', 'index': min_len})
-    elif len_new > len_old:
+    elif len_new > len_old: # If the new string is longer than the old string, add the remaining characters to the list
         for i in range (min_len, len_new):
             operations.append({'type': 'insert', 'index': i, 'char': new_text[i]})
         
@@ -244,12 +250,6 @@ def crdt_operations(old_text, new_text):
 
 '''
     This method is the main method of the file server. It starts the WebSocket server on port 6000
-
-    Args:
-        None
-
-    Returns:
-        None
 '''
 async def main():
     try:
