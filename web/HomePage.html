@@ -60,7 +60,7 @@
  
             // In this method are managed the WebSocket connections
             function connectedWebSocket() {
-                ws = new WebSocket('ws://localhost:5555'); // create a new WebSocket connection to the server
+                ws = new WebSocket('ws://' + hostname + ':5555'); // create a new WebSocket connection to the server
  
                 // In this method are managed open websockets connections, and we send the local changes did when the connection was closed to the server
                 ws.onopen = () => {
@@ -79,6 +79,7 @@
                     }
                 };
  
+
                 ws.onmessage = (event) => {
                     if (isValidJSON(event.data)) {
                         // Handle JSON messages here
@@ -104,7 +105,7 @@
 
                             editor.value = data.content;
 
-                            console.log(cursorPosition);
+                            //console.log(cursorPosition);
                             setCursorPosition(cursorPosition);
                         } 
                     } else {    
@@ -192,7 +193,7 @@
 
                 // from input event, we get the cursor position
                 cursorPosition = editor.selectionStart;
-                console.log('Saving cursor position:', username, cursorPosition);
+                //console.log('Saving cursor position:', username, cursorPosition);
 
                 if(isConnected) {
                     ws.send(JSON.stringify(message));
@@ -206,14 +207,14 @@
             // In this method we send the cursor position to the setCursorPosition method
             function sendCursorPosition() {
                 cursorPosition = editor.selectionStart;
-                console.log('Sending cursor position:', username, cursorPosition);
+                //console.log('Sending cursor position:', username, cursorPosition);
                 
                 setCursorPosition(cursorPosition);
             }
 
             // In this method we set the cursor position
             function setCursorPosition(position) {
-                console.log('Setting cursor position:', username);
+                //console.log('Setting cursor position:', username);
 
                 editor.focus(); // is a method in JavaScript that sets the focus on the specified element, which in this case is the textarea element with the ID editor. When the focus is set on an element, it becomes the active element on the page, meaning that it will receive any keyboard input from the user.
                 // is used to ensure that the cursor is placed inside the textarea element, allowing the user to continue typing or see the cursor position immediately after it has been set or updated.
@@ -231,16 +232,8 @@
                 userlist.textContent = '';
             };
  
-            // In this method are managed the reconnections
+            // In this method is managed the reconnections
             reconnectButton.onclick = () => {
-
-                // add the current content of the editor to the local changes, when the user reconnects
-                // localChanges.push({
-                //     type: 'reconnect',
-                //     content: editor.value,
-                //     username: username
-                // });
-
                 connectedWebSocket();
                 isConnected = true;
                 reconnectButton.disabled = true;
