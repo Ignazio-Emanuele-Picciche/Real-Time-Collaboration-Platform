@@ -1,23 +1,15 @@
+'''
+   This class implements the CRDT data structure for the shared file
+'''
 class CRDT:
-    """
-        This class implements the CRDT data structure for the shared file
-    """
 
-    '''
-        This method initializes the CRDT class
-
-        Args:
-            None
-
-        Returns:
-            None
-    '''
     def __init__(self):
         self.document = ""
         self.operations =[]
+
     
     '''
-        This method generates a unique identifier for an operation
+        This method applies an operation to the document, such as inserting or deleting a character
 
         Args:
             operation: The operation to apply to the document
@@ -32,12 +24,7 @@ class CRDT:
             self.document = self.document[:operation['index']] + self.document[operation['index'] +1:]
             self.operations.append(operation)
     
-    '''
-        This method gets the document
-        Args:
-            None
-        Returns:
-            document: The document
-    '''
+    
+    # Returns the document
     def get_document(self):
         return self.document

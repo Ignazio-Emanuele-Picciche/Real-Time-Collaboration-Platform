@@ -171,7 +171,7 @@ async def file_server(websocket, path):
         except json.JSONDecodeError:
             print('Error decoding JSON')
 
-        connected_clients[websocket] = username
+        connected_clients[websocket] = username # Add the client to the connected_clients dictionary
         join_message = f"{uuid.uuid4()}|System|{datetime.now().isoformat()}|{username} has joined the document."
         await send_to_all(join_message) # Send a message to all connected clients
         
@@ -181,7 +181,7 @@ async def file_server(websocket, path):
 
         if type != 'reconnect':
             await websocket.send(json.dumps({"type": "content", "content": content})) # Send the contents of the shared file to the client
-        else: 
+        else: # If the client is reconnecting, resolve the network partition, coflict and send the updated content
             content = messageRecv['content']
             updated_content = network_partition_consistency(crdt.get_document(), content)
             await save_file(updated_content)
@@ -194,13 +194,13 @@ async def file_server(websocket, path):
 
             if data['type'] == 'update':
                 content = data['content']
-                operations = crdt_operations(crdt.get_document(), content)
+                operations = crdt_operations(crdt.get_document(), content) # Calculate the operations to transform the old string into the new string, returning a list of operations
 
                 for op in operations:
                     crdt.apply_operation(op)
 
-                await save_file(crdt.get_document())
-                await broadcast({"type": "content", "content": crdt.get_document()})
+                await save_file(crdt.get_document()) # Save the updated content to the shared file
+                await broadcast({"type": "content", "content": crdt.get_document()}) # Broadcast the updated content to all connected clients
                 
     except websockets.ConnectionClosed:
         print("Connection closed")
