@@ -12,6 +12,8 @@ FILE_PATH = "shared_file.txt" # Path to the shared file
 crdt = CRDT() # Create an instance of the CRDT class
 start_server = ""
 
+
+### MESSAGE MANAGEMENT FUNCTIONS ###
 '''
     This method sends a message to all connected clients
 
@@ -25,6 +27,21 @@ async def send_to_all(message):
     # Loop through all connected clients and send the message
     if connected_clients:
         await asyncio.wait([client.send(message) for client in connected_clients])
+
+
+'''
+    This method broadcasts a message to all connected clients
+
+    Args:
+        message: The message to broadcast
+    
+    Returns:
+        None
+'''
+async def broadcast(message):
+    if connected_clients:
+        await asyncio.wait([client.send(json.dumps(message)) for client in connected_clients])
+
 
 '''
     This method sends the list of currently connected users to all clients
@@ -41,6 +58,10 @@ async def send_user_list():
         user_list_message = "USERS: " + "," + ",".join(connected_clients.values())
         await asyncio.wait([client.send(user_list_message) for client in connected_clients])
 
+
+
+
+### DOCUMENT MANAGEMENT FUNCTIONS ###
 '''
     This method loads and saves the contents of the shared file
 
@@ -56,6 +77,7 @@ async def load_file():
             return file.read()
     return ""
 
+
 '''
     This method saves the contents of the shared file
 
@@ -69,20 +91,51 @@ async def save_file(content):
     with open (FILE_PATH, 'w') as file:
         file.write(content)
 
-'''
-    This method broadcasts a message to all connected clients
 
-    Args:
-        message: The message to broadcast
+'''
+    This method calculates the difference between two strings and returns a new string that is consistent with both strings
+    
+    Args: 
+        onlineText: The online text
+        offlineText: The offline text
     
     Returns:
-        None
+        A new string that is consistent with both strings
 '''
-async def broadcast(message):
-    if connected_clients:
-        await asyncio.wait([client.send(json.dumps(message)) for client in connected_clients])
+def network_partition_consistency(onlineText, offlineText):
+    # Use SequenceMatcher to find differences
+    # SequenceMatcher is a class from the difflib module that helps to compare sequences of any type
+    matcher = difflib.SequenceMatcher(None, onlineText, offlineText)
+    result = []
+    
+    # Get and iterate through the operations (or "opcodes") that describe how to transform text1 into text2
+    for opcode in matcher.get_opcodes():
+        # Each opcode is a tuple containing: (tag, i1, i2, j1, j2)
+        # tag: type of operation (equal, replace, delete, insert)
+        # i1, i2: start and end index in onlineText
+        # j1, j2: start and end index in offlineText
+        tag, i1, i2, j1, j2 = opcode
+        
+        # If the parts are equal, add them to the result without changes
+        if tag == 'equal':
+            result.append(onlineText[i1:i2])
+        # If there's a replacement, add both the text from onlineText and offlineText
+        elif tag == 'replace':
+            result.append(onlineText[i1:i2])
+            result.append(offlineText[j1:j2])
+        # If there's a deletion, add the text from onlineText
+        elif tag == 'delete':
+            result.append(onlineText[i1:i2])
+        # If there's an insertion, add the text from offlineText
+        elif tag == 'insert':
+            result.append(offlineText[j1:j2])
+        
+    # Join all the pieces of text in the result and return it
+    return ''.join(result)
 
 
+
+### FILE SERVER LOGIC ###
 '''
     In this method, we manage the principal logic of the file server:
     - It handles the connection and communication with clients
@@ -102,6 +155,7 @@ async def file_server(websocket, path):
         await websocket.send("Welcome to the Shared File! Please enter your name:")
         messageRecv = await websocket.recv() # Wait for the client to send their username
         type = ''
+        username = ''
 
         try:
             messageRecv = json.loads(messageRecv)
@@ -155,48 +209,7 @@ async def file_server(websocket, path):
         await send_user_list()
 
 
-'''
-    This method calculates the difference between two strings and returns a new string that is consistent with both strings
-    
-    Args: 
-        onlineText: The online text
-        offlineText: The offline text
-    
-    Returns:
-        A new string that is consistent with both strings
-'''
-def network_partition_consistency(onlineText, offlineText):
-    # Use SequenceMatcher to find differences
-    # SequenceMatcher is a class from the difflib module that helps to compare sequences of any type
-    matcher = difflib.SequenceMatcher(None, onlineText, offlineText)
-    result = []
-    
-    # Get and iterate through the operations (or "opcodes") that describe how to transform text1 into text2
-    for opcode in matcher.get_opcodes():
-        # Each opcode is a tuple containing: (tag, i1, i2, j1, j2)
-        # tag: type of operation (equal, replace, delete, insert)
-        # i1, i2: start and end index in onlineText
-        # j1, j2: start and end index in offlineText
-        tag, i1, i2, j1, j2 = opcode
-        
-        # If the parts are equal, add them to the result without changes
-        if tag == 'equal':
-            result.append(onlineText[i1:i2])
-        # If there's a replacement, add both the text from onlineText and offlineText
-        elif tag == 'replace':
-            result.append(onlineText[i1:i2])
-            result.append(offlineText[j1:j2])
-        # If there's a deletion, add the text from onlineText
-        elif tag == 'delete':
-            result.append(onlineText[i1:i2])
-        # If there's an insertion, add the text from offlineText
-        elif tag == 'insert':
-            result.append(offlineText[j1:j2])
-        
-    # Join all the pieces of text in the result and return it
-    return ''.join(result)
-
-
+### CRDT OPERATIONS ###
 '''
     This method calculates the difference between two strings and returns a list of operations to transform the old string into the new string
     
@@ -208,8 +221,6 @@ def network_partition_consistency(onlineText, offlineText):
         operations: A list of operations to transform the old string into the new string
 '''
 def crdt_operations(old_text, new_text):
-    # print('\nOld Text:', old_text)
-    # print('\nNew Text:', new_text)
     operations = []
     len_old, len_new = len(old_text), len(new_text)
     min_len = min(len_old, len_new)
@@ -227,6 +238,9 @@ def crdt_operations(old_text, new_text):
             operations.append({'type': 'insert', 'index': i, 'char': new_text[i]})
         
     return operations
+
+
+
 
 '''
     This method is the main method of the file server. It starts the WebSocket server on port 6000
@@ -247,7 +261,3 @@ async def main():
  
 if __name__ == "__main__":
     asyncio.run(main())
-
-# Get the default event loop for the current context
-asyncio.get_event_loop().run_until_complete(start_server)  # Start the server and run until the start_server coroutine is complete
-asyncio.get_event_loop().run_forever()  # Run the event loop indefinitely to keep the server running
