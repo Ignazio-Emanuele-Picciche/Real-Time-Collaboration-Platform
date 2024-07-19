@@ -8,7 +8,7 @@ from CRDT import CRDT
 import difflib
 
 connected_clients = {} # Dictionary to store the connected clients 
-FILE_PATH = "shared_file.txt" # Path to the shared file
+FILE_PATH = "server/shared_file.txt" # Path to the shared file
 crdt = CRDT() # Create an instance of the CRDT class
 start_server = ""
 

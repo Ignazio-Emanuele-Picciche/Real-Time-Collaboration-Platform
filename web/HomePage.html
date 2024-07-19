@@ -18,10 +18,12 @@
                 <button id="simulatePartition" disabled>Simulate Partition</button>
                 <button id="reconnect" disabled>Reconnect</button>
             </section>
+
             <section id="document-section">
                 <h2>Shared Document</h2>
                 <textarea id="editor" rows="20" placeholder="Content Document..." disabled></textarea>
             </section>
+
             <section id="status-section">
                 <h2 style="color: #51a2fffd;">Status</h2>
                 <div>
@@ -30,6 +32,7 @@
                 <div id="status-wrapper">
                     <div id="status"></div>
                 </div>
+
                 <h2 style="color: #51a2fffd;">Online Users</h2>
                 <div id="userlist-wrapper">
                     <div id="userlist"></div>
@@ -50,23 +53,29 @@
            
             let username = '';
             let ws;
-            let localChanges = [];
+            //let localChanges = [];
             let isConnected = true;
             const hostname = window.location.hostname;
             let cursorPosition;
  
-            // In this method we create a connection with the server
+            // In this method are managed the WebSocket connections
             function connectedWebSocket() {
-                ws = new WebSocket('ws://' + hostname + ':5555/');
+                ws = new WebSocket('ws://localhost:5555'); // create a new WebSocket connection to the server
  
+                // In this method are managed open websockets connections, and we send the local changes did when the connection was closed to the server
                 ws.onopen = () => {
-                    if (localChanges.length > 0) {
+                    if (username !== '') {
                         editor.disabled = false;
-                        newContent = localChanges[localChanges.length - 1];
-                        newContent.type = 'reconnect';
+
+                        newContent = {
+                            type: 'reconnect',
+                            content: editor.value,
+                            username: username
+                        };
+
                         ws.send(JSON.stringify(newContent));
                         // localChanges.forEach(change => ws.send(JSON.stringify(change)));
-                        localChanges = []; // after sending the changes, we clear the local changes
+                        //localChanges = []; // after sending the changes, we clear the local changes
                     }
                 };
  
@@ -179,7 +188,7 @@
                     username: username
                 };
                 
-                localChanges.push(message);
+                //localChanges.push(message);
 
                 // from input event, we get the cursor position
                 cursorPosition = editor.selectionStart;
@@ -222,8 +231,16 @@
                 userlist.textContent = '';
             };
  
-            // In this method we reconnect the server
+            // In this method are managed the reconnections
             reconnectButton.onclick = () => {
+
+                // add the current content of the editor to the local changes, when the user reconnects
+                // localChanges.push({
+                //     type: 'reconnect',
+                //     content: editor.value,
+                //     username: username
+                // });
+
                 connectedWebSocket();
                 isConnected = true;
                 reconnectButton.disabled = true;
