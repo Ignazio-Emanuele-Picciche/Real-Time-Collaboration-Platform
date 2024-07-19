@@ -7,13 +7,19 @@ import websockets
 from CRDT import CRDT
 import difflib
 
-connected_clients = {} # Dictionary to store the connected clients
+connected_clients = {} # Dictionary to store the connected clients 
 FILE_PATH = "shared_file.txt" # Path to the shared file
 crdt = CRDT() # Create an instance of the CRDT class
 start_server = ""
 
 '''
     This method sends a message to all connected clients
+
+    Args:
+        message: The message to send to all clients
+
+    Returns:
+        None
 '''
 async def send_to_all(message):
     # Loop through all connected clients and send the message
@@ -22,6 +28,12 @@ async def send_to_all(message):
 
 '''
     This method sends the list of currently connected users to all clients
+
+    Args:
+        None
+
+    Returns:
+        None
 '''
 async def send_user_list():
     # Loop through all connected clients and send the user list
@@ -31,6 +43,12 @@ async def send_user_list():
 
 '''
     This method loads and saves the contents of the shared file
+
+    Args:
+        None
+
+    Returns:
+        The contents of the shared file
 '''
 async def load_file():
     if os.path.exists(FILE_PATH):
@@ -40,6 +58,12 @@ async def load_file():
 
 '''
     This method saves the contents of the shared file
+
+    Args:
+        content: The content to save in the file
+
+    Returns:
+        None
 '''
 async def save_file(content):
     with open (FILE_PATH, 'w') as file:
@@ -47,6 +71,12 @@ async def save_file(content):
 
 '''
     This method broadcasts a message to all connected clients
+
+    Args:
+        message: The message to broadcast
+    
+    Returns:
+        None
 '''
 async def broadcast(message):
     if connected_clients:
@@ -134,7 +164,7 @@ async def file_server(websocket, path):
     
     Returns:
         A new string that is consistent with both strings
-    '''
+'''
 def network_partition_consistency(onlineText, offlineText):
     # Use SequenceMatcher to find differences
     # SequenceMatcher is a class from the difflib module that helps to compare sequences of any type
@@ -198,6 +228,15 @@ def crdt_operations(old_text, new_text):
         
     return operations
 
+'''
+    This method is the main method of the file server. It starts the WebSocket server on port 6000
+
+    Args:
+        None
+
+    Returns:
+        None
+'''
 async def main():
     try:
         start_server = await websockets.serve(file_server, '0.0.0.0', 6000)
