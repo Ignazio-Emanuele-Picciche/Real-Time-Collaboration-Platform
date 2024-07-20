@@ -7,6 +7,8 @@
 
 > [!NOTE] <br>
 > You can find the complete documentation here: [english version](Real_Time_Collaboration_Platform_ENG.pdf) or [italian version](Real_Time_Collaboration_Platform_ITA.pdf)
+>
+> You can find the site here: http://34.154.59.47:8583/
 
 
 ### General description of the project
@@ -22,7 +24,4 @@ This project, made by Ignazio Emanuele Piccichè, Mattia Castiello and Michela D
 To verify the robustness of the platform, targeted experiments were conducted, including:
 - Simulating network partitions to test the system's ability to reconcile changes.
 - Analyzing the impact of different conflict resolution strategies on the system's consistency and latency.
-
-<br><br>
-
 
