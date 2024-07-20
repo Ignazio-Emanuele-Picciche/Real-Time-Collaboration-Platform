@@ -8,7 +8,7 @@
 > [!NOTE] <br>
 > You can find the complete documentation here: [english version](Real_Time_Collaboration_Platform_ENG.pdf) or [italian version](Real_Time_Collaboration_Platform_ITA.pdf)
 >
-> You can find the site here: http://34.154.59.47:8583/
+> You can find the site here: http://34.154.59.47:8583/  **(DISABLED)**
 
 
 ### General description of the project
